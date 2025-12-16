@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Map, Heart, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export default function CityModalContent({ cityName, user, openLoginModal, onAdd
     queryFn: async () => {
       if (!cityName) return [];
 
-      const allTrips = await base44.entities.Trip.list('-likes');
+      const allTrips = await Trip.list('-likes');
 
       const normalizedCityName = cityName.toLowerCase().trim();
       const cityNameOnly = normalizedCityName.split(',')[0].trim();

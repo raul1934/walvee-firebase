@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { User } from "@/api/entities";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Shield, AlertTriangle, Download, Trash2 } from "lucide-react";
@@ -18,7 +18,7 @@ export default function PrivacySettings() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const currentUser = await base44.auth.me();
+        const currentUser = await User.me();
         setUser(currentUser);
         setConsents({
           consent_location: currentUser.consent_location || false,
@@ -53,7 +53,7 @@ export default function PrivacySettings() {
         updateData.gender_other = null;
       }
 
-      await base44.auth.updateMe(updateData);
+      await User.updateMe(updateData);
       alert("Preferências atualizadas com sucesso!");
     } catch (error) {
       console.error("Error updating consents:", error);
@@ -65,7 +65,7 @@ export default function PrivacySettings() {
 
   const handleExportData = async () => {
     try {
-      const currentUser = await base44.auth.me();
+      const currentUser = await User.me();
       const dataStr = JSON.stringify(currentUser, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);

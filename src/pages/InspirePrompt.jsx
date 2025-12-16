@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeLLM } from "@/api/llmService";
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Loader2, X, MapPin, Star, Sparkles, Filter, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -759,7 +759,7 @@ IMPORTANT: Always check grammar and spelling in your responses. Ensure all text 
         systemPrompt += `\n\nCURRENT CITY CONTEXT: The user is currently planning their trip to ${activeCity}. Focus recommendations ONLY on places, activities, and experiences IN ${activeCity}. Do NOT suggest other cities.`;
       }
 
-      const response = await base44.integrations.Core.InvokeLLM({
+      const response = await invokeLLM({
         prompt: `${systemPrompt}
 
 CONVERSATION HISTORY:

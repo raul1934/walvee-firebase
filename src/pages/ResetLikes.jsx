@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip, TripLike } from "@/api/entities";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -15,23 +15,23 @@ export default function ResetLikes() {
         setStatus('deleting-likes');
         
         // 1. Get all like records
-        const allLikes = await base44.entities.TripLike.list();
+        const allLikes = await TripLike.list();
         
         console.log('[Reset Likes] Found', allLikes.length, 'like records to delete');
         
         // 2. Delete all like records
         for (const like of allLikes) {
-          await base44.entities.TripLike.delete(like.id);
+          await TripLike.delete(like.id);
         }
         
         console.log('[Reset Likes] Deleted all like records');
         setStatus('updating-trips');
         
         // 3. Reset all trips likes to 0
-        const allTrips = await base44.entities.Trip.list();
+        const allTrips = await Trip.list();
         
         for (const trip of allTrips) {
-          await base44.entities.Trip.update(trip.id, { likes: 0 });
+          await Trip.update(trip.id, { likes: 0 });
         }
         
         console.log('[Reset Likes] Reset', allTrips.length, 'trips to 0 likes');

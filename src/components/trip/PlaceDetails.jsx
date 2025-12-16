@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
+import { invokeLLM } from "@/api/llmService";
+import { Review } from "@/api/entities";
 import { X, Clock, MapPin, Star, Phone, Globe, Heart, Navigation, Camera, Info, Image as ImageIcon, Car, Bus, Bike, Footprints, Trash2, DollarSign, AlertTriangle, Lightbulb, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UserAvatar from "../common/UserAvatar";
 import ImagePlaceholder from "../common/ImagePlaceholder";
-import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPriceRangeInfo } from "../utils/priceFormatter";
 import { useFavorites } from "../hooks/useFavorites";
@@ -183,7 +184,7 @@ export default function PlaceDetails({ place, trip, onClose, onPhotoClick, user,
   const { data: userReviews = [] } = useQuery({
     queryKey: ['reviews', enrichedPlace.name],
     queryFn: async () => {
-      const allReviews = await base44.entities.Review.list('-created_date');
+      const allReviews = await Review.list('-created_date');
       return allReviews.filter(review => review.place_name === enrichedPlace.name);
     },
     enabled: !!enrichedPlace.name,
@@ -218,7 +219,7 @@ export default function PlaceDetails({ place, trip, onClose, onPhotoClick, user,
       const city = trip?.destination?.split(',')[0] || enrichedPlace.address?.split(',')[1]?.trim() || 'Unknown';
       const country = trip?.destination?.split(',')[1]?.trim() || enrichedPlace.address?.split(',')[2]?.trim() || 'Unknown';
       
-      return base44.entities.Review.create({
+      return Review.create({
         place_name: enrichedPlace.name,
         place_address: enrichedPlace.address,
         place_id: enrichedPlace.place_id || null,
@@ -264,7 +265,7 @@ export default function PlaceDetails({ place, trip, onClose, onPhotoClick, user,
 
   const deleteReviewMutation = useMutation({
     mutationFn: async (reviewId) => {
-      return base44.entities.Review.delete(reviewId);
+      return Review.delete(reviewId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews', enrichedPlace.name] });
@@ -526,7 +527,7 @@ Sources:
 
 **Tone:** Helpful travel curator sharing expert insights — informative, warm, trustworthy.`;
 
-        const response = await base44.integrations.Core.InvokeLLM({
+        const response = await invokeLLM({
           prompt: prompt,
           add_context_from_internet: true,
           response_json_schema: {

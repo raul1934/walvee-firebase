@@ -4,8 +4,8 @@ import { ThumbsUp, Infinity, Link as LinkIcon, ChevronLeft, ChevronRight, MapPin
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Trip, TripLike, TripSteal } from "@/api/entities";
 import TripItinerary from "./TripItinerary";
 import TripCardViewToggle from "./TripCardViewToggle";
 import { Link } from "react-router-dom";
@@ -60,7 +60,7 @@ export default function TripCard({ trip, isLoggedIn = true, onRestrictedAction, 
       
       if (shouldLike) {
         // Criar like
-        await base44.entities.TripLike.create({
+        await TripLike.create({
           trip_id: trip.id,
           trip_owner_id: trip.created_by,
           liker_id: currentUserId
@@ -68,22 +68,22 @@ export default function TripCard({ trip, isLoggedIn = true, onRestrictedAction, 
         console.log('[TripCard] Like created');
         
         // Atualizar contador no Trip
-        await base44.entities.Trip.update(trip.id, {
+        await Trip.update(trip.id, {
           likes: likesCount + 1
         });
         console.log('[TripCard] Trip likes updated:', likesCount + 1);
       } else {
         // Buscar e deletar like existente
-        const likes = await base44.entities.TripLike.filter({
+        const likes = await TripLike.filter({
           trip_id: trip.id,
           liker_id: currentUserId
         });
         if (likes.length > 0) {
-          await base44.entities.TripLike.delete(likes[0].id);
+          await TripLike.delete(likes[0].id);
           console.log('[TripCard] Like deleted');
           
           // Atualizar contador no Trip
-          await base44.entities.Trip.update(trip.id, {
+          await Trip.update(trip.id, {
             likes: Math.max(0, likesCount - 1)
           });
           console.log('[TripCard] Trip likes updated:', Math.max(0, likesCount - 1));
@@ -109,17 +109,17 @@ export default function TripCard({ trip, isLoggedIn = true, onRestrictedAction, 
 
   const stealMutation = useMutation({
     mutationFn: async () => {
-      const existingSteals = await base44.entities.TripSteal.filter({
+      const existingSteals = await TripSteal.filter({
         trip_id: trip.id,
         created_by: currentUserId
       });
       
       if (existingSteals.length === 0) {
-        await base44.entities.TripSteal.create({
+        await TripSteal.create({
           trip_id: trip.id,
           source_owner_id: trip.created_by
         });
-        await base44.entities.Trip.update(trip.id, {
+        await Trip.update(trip.id, {
           steals: stealsCount + 1
         });
         return true;
@@ -180,7 +180,7 @@ export default function TripCard({ trip, isLoggedIn = true, onRestrictedAction, 
       await navigator.clipboard.writeText(shareUrl);
       setShowShareTooltip(true);
       
-      await base44.entities.Trip.update(trip.id, {
+      await Trip.update(trip.id, {
         shares: sharesCount + 1
       });
       queryClient.invalidateQueries({ queryKey: ['trips'] });

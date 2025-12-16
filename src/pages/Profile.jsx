@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip, TripLike, Follow, User } from "@/api/entities";
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { MapPin, Calendar, ArrowRight, Edit, Users, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,11 @@ export default function Profile({ user: currentUser, openLoginModal }) {
   const tryGetFullUserData = async (email, id) => {
     try {
       if (email) {
-        const users = await base44.entities.User.filter({ email });
+        const users = await User.filter({ email });
         if (users.length > 0) return users[0];
       }
       if (id) {
-        const user = await base44.entities.User.get(id);
+        const user = await User.get(id);
         if (user) return user;
       }
     } catch (error) {
@@ -80,7 +80,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
         console.log('[Profile] Attempting to build user profile from public trips for email:', targetUserEmail);
         try {
           // Get all trips (public)
-          const allTrips = await base44.entities.Trip.list();
+          const allTrips = await Trip.list();
           
           // Find trips by this user
           const userTripsByEmail = allTrips.filter(t => t.created_by === targetUserEmail);
@@ -117,7 +117,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
         console.log('[Profile] Attempting authenticated user fetch...');
         try {
           if (targetUserEmail) {
-            const users = await base44.entities.User.filter({ email: targetUserEmail });
+            const users = await User.filter({ email: targetUserEmail });
             if (users.length > 0) {
               userFromAuthenticatedSource = users[0];
               console.log('[Profile] Found user by email (authenticated):', userFromAuthenticatedSource.email);
@@ -125,7 +125,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
           }
           
           if (!userFromAuthenticatedSource && targetUserId && !targetUserId.includes('@')) {
-            const user = await base44.entities.User.get(targetUserId);
+            const user = await User.get(targetUserId);
             if (user) {
               userFromAuthenticatedSource = user;
               console.log('[Profile] Found user by ID (authenticated):', userFromAuthenticatedSource.email);
@@ -158,7 +158,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
     queryFn: async () => {
       if (!profileUser?.email) return [];
       
-      const allTrips = await base44.entities.Trip.list("-created_date"); // Trips are public
+      const allTrips = await Trip.list("-created_date"); // Trips are public
       const userTrips = allTrips.filter(trip => trip.created_by === profileUser.email);
       
       return userTrips;
@@ -200,7 +200,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
       }
       
       try {
-        const follows = await base44.entities.Follow.filter({ 
+        const follows = await Follow.filter({ 
           followee_id: profileUser.id,
           follower_id: currentUser.id
         });
@@ -229,7 +229,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
     queryFn: async () => {
       if (!currentUser?.id) return [];
       try {
-        return await base44.entities.TripLike.filter({ liker_id: currentUser.id });
+        return await TripLike.filter({ liker_id: currentUser.id });
       } catch (error) {
         console.error('[Likes] Error fetching user likes:', error);
         return [];
@@ -266,7 +266,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
       : { follower_id: userId };
 
     try {
-      const followRecords = await base44.entities.Follow.filter(
+      const followRecords = await Follow.filter(
         filterOptions,
         {
           limit: USERS_PAGE_SIZE,
@@ -287,7 +287,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
       if (userIds.length === 0) {
         return { data: [], nextPage: undefined };
       }
-      const users = await base44.entities.User.filter({ id: { in: userIds } });
+      const users = await User.filter({ id: { in: userIds } });
 
       // Ensure order is preserved and filter out any users not found
       const orderedUsers = userIds
@@ -392,7 +392,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
     mutationFn: async () => {
       if (!currentUser || !profileUser || !profileUser.id) throw new Error("Not authenticated or profile user ID missing.");
 
-      return await base44.entities.Follow.create({
+      return await Follow.create({
         followee_id: profileUser.id,
         follower_id: currentUser.id,
         followee_email: profileUser.email
@@ -460,7 +460,7 @@ export default function Profile({ user: currentUser, openLoginModal }) {
       if (!followStatus || followStatus.id === 'optimistic-follow') {
         throw new Error("Not following");
       }
-      return await base44.entities.Follow.delete(followStatus.id);
+      return await Follow.delete(followStatus.id);
     },
     onMutate: async () => {
       await queryClient.cancelQueries(['followStatus', profileUser?.id, currentUser?.id]);

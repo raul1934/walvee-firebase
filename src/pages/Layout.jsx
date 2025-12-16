@@ -3,9 +3,9 @@ import React, { useState, useEffect } from "react";
 import { firebaseAuthService } from "@/api/firebaseAuth";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import Navbar from "./components/layout/Navbar";
-import Sidebar from "./components/layout/Sidebar";
-import LoginModal from "./components/common/LoginModal";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import LoginModal from "@/components/common/LoginModal";
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = React.useState(null);

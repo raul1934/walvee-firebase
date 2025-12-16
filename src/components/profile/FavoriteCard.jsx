@@ -1,7 +1,7 @@
 import React from "react";
+import { TripLike } from "@/api/entities";
 import { MapPin, Star, Heart, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { getPriceRangeInfo } from "../utils/priceFormatter";
 import ImagePlaceholder from "../common/ImagePlaceholder";
 
@@ -13,7 +13,7 @@ export default function FavoriteCard({ favorite, currentUser, isOwnProfile, onPl
 
   const deleteFavoriteMutation = useMutation({
     mutationFn: async () => {
-      return await base44.entities.Favorite.delete(favorite.id);
+      return await TripLike.delete(favorite.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['favorites', currentUser?.id]);

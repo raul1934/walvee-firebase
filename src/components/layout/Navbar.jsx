@@ -1,11 +1,11 @@
 
 import React, { useState } from "react";
+import { User } from "@/api/entities";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Menu, Bell, Search } from "lucide-react";
 import UserAvatar from "../common/UserAvatar";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useGlobalSearch } from "../search/useGlobalSearch";
 import SearchOverlay from "../search/SearchOverlay";
 import PlaceModal from "../city/PlaceModal";
@@ -32,7 +32,7 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
     queryFn: async () => {
       if (!user?.id) return null;
       try {
-        return await base44.auth.me();
+        return await User.me();
       } catch (error) {
         // Silent fail - just return the user prop
         return user;

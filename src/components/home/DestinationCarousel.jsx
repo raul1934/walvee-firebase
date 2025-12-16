@@ -1,6 +1,6 @@
 import React from "react";
+import { Trip } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -38,7 +38,7 @@ export default function DestinationCarousel() {
         }
 
         console.log('[DestinationCarousel] Fetching cities from API');
-        const allTrips = await base44.entities.Trip.list();
+        const allTrips = await Trip.list();
         
         // Extract and count cities from trip destinations
         const cityCount = {};

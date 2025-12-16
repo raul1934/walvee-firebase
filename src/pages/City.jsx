@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -147,7 +147,7 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     queryFn: async () => {
       if (!cityName) return [];
 
-      const allTrips = await base44.entities.Trip.list('-likes');
+      const allTrips = await Trip.list('-likes');
 
       const normalizedCityName = cityName.toLowerCase().trim();
       const cityNameOnly = normalizedCityName.split(',')[0].trim();

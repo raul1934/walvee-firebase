@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-
+import { Trip, User } from "@/api/entities";
 const GOOGLE_MAPS_API_KEY = "AIzaSyBYLf9H7ZYfGU5fZa2Fr6XfA9ZkBmJHTb4";
 
 export function useGlobalSearch(cityContext = null) {
@@ -165,16 +164,16 @@ export function useGlobalSearch(cityContext = null) {
       console.log('[Search] Normalized:', normalizedQuery);
       console.log('[Search] City Context:', cityContext || 'none');
 
-      const isAuthenticated = await base44.auth.isAuthenticated();
+      const isAuthenticated = await User.isAuthenticated();
       console.log('[Search] Authenticated:', isAuthenticated);
 
       const [allTrips, allUsers, googlePlaces] = await Promise.all([
-        base44.entities.Trip.list().catch(err => {
+        Trip.list().catch(err => {
           console.error('[Search] Error fetching trips:', err);
           return [];
         }),
         isAuthenticated 
-          ? base44.entities.User.list().catch(err => {
+          ? User.list().catch(err => {
               console.error('[Search] Error fetching users:', err);
               return [];
             })

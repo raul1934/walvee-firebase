@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { invokeLLM } from "@/api/llmService";
 import { MapPin, Star, Building2, Compass, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
 import ImagePlaceholder from '../common/ImagePlaceholder';
 import { getCompactPriceDisplay } from '../utils/priceFormatter';
 
@@ -50,7 +50,7 @@ export default function RecommendationCard({ recommendation }) {
       try {
         const searchQuery = `${recommendation.name} ${recommendation.city || ''} ${recommendation.country || ''}`.trim();
         
-        const response = await base44.integrations.Core.InvokeLLM({
+        const response = await invokeLLM({
           prompt: `Search Google Places API for: "${searchQuery}"
           
 Return ONLY the place_id if found, or null if not found.

@@ -1,14 +1,13 @@
 
 import React from "react";
+import { User } from "@/api/entities";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
-
 export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
   const handleSignOut = () => {
     onClose();
     const homeUrl = window.location.origin + createPageUrl("Home");
-    base44.auth.logout(homeUrl);
+    User.logout(homeUrl);
   };
 
   return (

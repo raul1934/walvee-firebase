@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
+import { TripLike } from "@/api/entities";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-
 /**
  * Global favorites hook - manages favorites across the entire app
  * Provides consistent favorite state and operations
@@ -24,7 +23,7 @@ export function useFavorites(user) {
       }
       
       console.log('[useFavorites] Fetching favorites for user:', user.id);
-      const allFavorites = await base44.entities.Favorite.list('-created_date');
+      const allFavorites = await TripLike.list('-created_date');
       const userFavorites = allFavorites.filter(fav => fav.created_by === user.email);
       
       console.log('[useFavorites] Loaded favorites:', userFavorites.length);
@@ -40,7 +39,7 @@ export function useFavorites(user) {
     mutationFn: async (placeData) => {
       console.log('[useFavorites] Adding favorite:', placeData.place_name);
       
-      return await base44.entities.Favorite.create({
+      return await TripLike.create({
         place_name: placeData.place_name,
         place_address: placeData.place_address || placeData.address,
         place_id: placeData.place_id || null,
@@ -67,7 +66,7 @@ export function useFavorites(user) {
   const removeFavoriteMutation = useMutation({
     mutationFn: async (favoriteId) => {
       console.log('[useFavorites] Removing favorite:', favoriteId);
-      return await base44.entities.Favorite.delete(favoriteId);
+      return await TripLike.delete(favoriteId);
     },
     onSuccess: () => {
       console.log('[useFavorites] Favorite removed successfully');

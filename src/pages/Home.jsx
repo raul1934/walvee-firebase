@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Trip } from "@/api/entities";
+import { Trip, TripLike } from "@/api/entities";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -59,7 +59,7 @@ export default function Home({ user, userLoading, openLoginModal }) {
       if (!user?.id) return [];
       try {
         // Single query to get all likes by this user
-        return await base44.entities.TripLike.filter({ liker_id: user.id });
+        return await TripLike.filter({ liker_id: user.id });
       } catch (error) {
         console.error('[Likes] Error fetching user likes:', error);
         return [];

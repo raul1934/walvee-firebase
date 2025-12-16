@@ -1,6 +1,5 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { MapPin, Star, Heart } from "lucide-react";
 import { useFavorites } from "../hooks/useFavorites";
 import { getPriceRangeInfo } from "../utils/priceFormatter";

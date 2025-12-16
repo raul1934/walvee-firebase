@@ -1,6 +1,6 @@
 import React from "react";
+import { User } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Users } from "lucide-react";
@@ -12,14 +12,14 @@ export default function CityLocals({ cityName }) {
     queryKey: ['cityLocals', cityName],
     queryFn: async () => {
       try {
-        const isAuthenticated = await base44.auth.isAuthenticated();
+        const isAuthenticated = await User.isAuthenticated();
         if (!isAuthenticated) {
           console.log('[CityLocals] User not authenticated');
           return [];
         }
 
         console.log('[CityLocals] Fetching users for city:', cityName);
-        const allUsers = await base44.entities.User.list();
+        const allUsers = await User.list();
         console.log('[CityLocals] Total users:', allUsers.length);
         
         // Normalize city name for comparison

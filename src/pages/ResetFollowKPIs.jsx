@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { Follow, User } from "@/api/entities";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -11,13 +11,13 @@ export default function ResetFollowKPIs() {
   useEffect(() => {
     const resetKPIs = async () => {
       try {
-        const currentUser = await base44.auth.me();
+        const currentUser = await User.me();
         
         console.log('[Reset] Starting follow KPI reset for user:', currentUser.id);
         setStatus('deleting-follows');
         
         // 1. Get all follow records involving this user
-        const allFollows = await base44.entities.Follow.list();
+        const allFollows = await Follow.list();
         const userFollows = allFollows.filter(f => 
           f.follower_id === currentUser.id || f.followee_id === currentUser.id
         );
@@ -26,14 +26,14 @@ export default function ResetFollowKPIs() {
         
         // 2. Delete all follow records
         for (const follow of userFollows) {
-          await base44.entities.Follow.delete(follow.id);
+          await Follow.delete(follow.id);
         }
         
         console.log('[Reset] Deleted all follow records');
         setStatus('updating-kpis');
         
         // 3. Reset KPIs to 0
-        await base44.auth.updateMe({
+        await User.updateMe({
           metrics_following: 0,
           metrics_followers: 0
         });

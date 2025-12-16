@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip, TripLike, TripSteal, Follow, User } from "@/api/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ThumbsUp, MapPin, Calendar, Share2, Instagram, Linkedin, Image, Map, Info, Infinity, MessageSquare, Edit } from "lucide-react";
@@ -79,7 +79,7 @@ export default function TripDetails({ user, openLoginModal }) {
   const { data: tripData, isLoading } = useQuery({
     queryKey: ["trip", tripId],
     queryFn: async () => {
-      const trip = await base44.entities.Trip.get(tripId);
+      const trip = await Trip.get(tripId);
       return normalizeTripItinerary(trip);
     },
     enabled: !!tripId,
@@ -92,7 +92,7 @@ export default function TripDetails({ user, openLoginModal }) {
     queryKey: ['currentUser'],
     queryFn: async () => {
       try {
-        return await base44.auth.me();
+        return await User.me();
       } catch (error) {
         console.warn('[TripDetails] Error fetching current user:', error.message);
         return null;
@@ -110,7 +110,7 @@ export default function TripDetails({ user, openLoginModal }) {
     queryKey: ['derivations', tripId],
     queryFn: async () => {
       try {
-        const all = await base44.entities.TripDerivation.list();
+        const all = await TripSteal.list();
         return all.filter(d => d.source_trip_id === tripId && d.status === 'created');
       } catch (error) {
         console.warn('[TripDetails] Error fetching derivations:', error.message);
@@ -140,7 +140,7 @@ export default function TripDetails({ user, openLoginModal }) {
       }
 
       try {
-        const follows = await base44.entities.Follow.filter({
+        const follows = await Follow.filter({
           followee_id: tripData.created_by,
           follower_id: currentUser.id
         });
@@ -181,7 +181,7 @@ export default function TripDetails({ user, openLoginModal }) {
       }
 
       try {
-        const likes = await base44.entities.TripLike.filter({
+        const likes = await TripLike.filter({
           trip_id: tripId,
           liker_id: currentUser.id
         });
@@ -221,7 +221,7 @@ export default function TripDetails({ user, openLoginModal }) {
         follower_id: currentUser.id
       });
 
-      return await base44.entities.Follow.create({
+      return await Follow.create({
         followee_id: tripData.created_by,
         follower_id: currentUser.id,
         followee_email: tripData.author_email || tripData.created_by
@@ -305,7 +305,7 @@ export default function TripDetails({ user, openLoginModal }) {
 
       console.log('[Unfollow] Deleting follow:', followStatus.id);
 
-      return await base44.entities.Follow.delete(followStatus.id);
+      return await Follow.delete(followStatus.id);
     },
     onMutate: async () => {
       const startTime = Date.now();
@@ -382,7 +382,7 @@ export default function TripDetails({ user, openLoginModal }) {
         trip_owner_id: tripData.created_by
       });
 
-      return await base44.entities.TripLike.create({
+      return await TripLike.create({
         trip_id: tripId,
         liker_id: currentUser.id,
         trip_owner_id: tripData.created_by
@@ -464,7 +464,7 @@ export default function TripDetails({ user, openLoginModal }) {
 
       console.log('[Unlike] Deleting like:', likeStatus.id);
 
-      return await base44.entities.TripLike.delete(likeStatus.id);
+      return await TripLike.delete(likeStatus.id);
     },
     onMutate: async () => {
       const startTime = Date.now();
@@ -1059,11 +1059,11 @@ export default function TripDetails({ user, openLoginModal }) {
   };
 
   const handleStealClick = async () => {
-    const isAuthenticated = await base44.auth.isAuthenticated();
+    const isAuthenticated = await User.isAuthenticated();
 
     if (!isAuthenticated) {
       const currentUrl = window.location.pathname + window.location.search + '#steal';
-      base44.auth.redirectToLogin(currentUrl);
+      User.redirectToLogin(currentUrl);
       return;
     }
 
@@ -1074,7 +1074,7 @@ export default function TripDetails({ user, openLoginModal }) {
     setIsStealLoading(true);
 
     try {
-      await base44.entities.TripDerivation.create({
+      await TripSteal.create({
         source_trip_id: tripId,
         source_owner_id: tripData.created_by,
         status: 'preview',
@@ -1100,7 +1100,7 @@ export default function TripDetails({ user, openLoginModal }) {
 
   const handleFollowClick = async () => {
     if (!currentUser) {
-      base44.auth.redirectToLogin(window.location.href);
+      User.redirectToLogin(window.location.href);
       return;
     }
     if (isAuthor) return;
@@ -1118,7 +1118,7 @@ export default function TripDetails({ user, openLoginModal }) {
 
   const handleLikeClick = async () => {
     if (!currentUser) {
-      base44.auth.redirectToLogin(window.location.href);
+      User.redirectToLogin(window.location.href);
       return;
     }
 

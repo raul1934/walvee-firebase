@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { User } from "@/api/entities";
+import { uploadImage } from "@/api/firebaseStorage";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,7 +124,7 @@ export default function EditProfile({ user, userLoading }) {
 
     setUploadingPhoto(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadImage(file);
       setFormData(prev => ({ ...prev, photo_url: file_url }));
     } catch (error) {
       console.error('Error uploading photo:', error);
@@ -156,7 +157,7 @@ export default function EditProfile({ user, userLoading }) {
         updateData.photo_updated_at = new Date().toISOString();
       }
 
-      await base44.auth.updateMe(updateData);
+      await User.updateMe(updateData);
       window.location.href = createPageUrl("Profile");
     } catch (error) {
       console.error('Error updating profile:', error);

@@ -1,5 +1,3 @@
-import { base44 } from "@/api/base44Client";
-
 /**
  * Update user KPIs (followers, following, trips)
  * Non-blocking - errors are logged but don't throw
@@ -12,7 +10,7 @@ export async function updateUserKPIs(userId, changes) {
 
   try {
     // Fetch current user data
-    const user = await base44.entities.User.get(userId);
+    const user = await User.get(userId);
     
     if (!user) {
       console.warn('[KPIs] User not found:', userId);
@@ -55,7 +53,7 @@ export async function updateUserKPIs(userId, changes) {
     }
 
     console.log('[KPIs] Updating user KPIs:', { userId, updates });
-    await base44.entities.User.update(userId, updates);
+    await User.update(userId, updates);
     console.log('[KPIs] User KPIs updated successfully');
     return true;
 
@@ -82,7 +80,7 @@ export async function updateTripKPIs(tripId, changes) {
 
   try {
     // Fetch current trip data
-    const trip = await base44.entities.Trip.get(tripId);
+    const trip = await Trip.get(tripId);
     
     if (!trip) {
       console.warn('[KPIs] Trip not found:', tripId);
@@ -125,7 +123,7 @@ export async function updateTripKPIs(tripId, changes) {
     }
 
     console.log('[KPIs] Updating trip KPIs:', { tripId, updates });
-    await base44.entities.Trip.update(tripId, updates);
+    await Trip.update(tripId, updates);
     console.log('[KPIs] Trip KPIs updated successfully');
     return true;
 
@@ -154,7 +152,7 @@ export async function fetchUserKPIs(userId) {
   }
 
   try {
-    const user = await base44.entities.User.get(userId);
+    const user = await User.get(userId);
     
     return {
       metrics_followers: user?.metrics_followers || 0,
@@ -190,7 +188,7 @@ export async function fetchTripKPIs(tripId) {
   }
 
   try {
-    const trip = await base44.entities.Trip.get(tripId);
+    const trip = await Trip.get(tripId);
     
     return {
       likes: trip?.likes || 0,

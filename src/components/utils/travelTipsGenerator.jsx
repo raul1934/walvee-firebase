@@ -1,5 +1,3 @@
-import { base44 } from "@/api/base44Client";
-
 /**
  * Generate travel tips for a specific day using Gemini AI
  */
@@ -40,7 +38,7 @@ ${placesContext}
 - Omit periods without relevant activities (don't return empty strings)`;
 
   try {
-    const response = await base44.integrations.Core.InvokeLLM({
+    const response = await invokeLLM({
       prompt: prompt,
       add_context_from_internet: false,
       response_json_schema: {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip } from "@/api/entities";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Image, CheckCircle, XCircle, Loader } from "lucide-react";
@@ -19,7 +19,7 @@ export default function EnrichTripImages() {
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ['allTrips'],
     queryFn: async () => {
-      return await base44.entities.Trip.list("-created_date");
+      return await Trip.list("-created_date");
     },
   });
 
@@ -115,7 +115,7 @@ export default function EnrichTripImages() {
 
     // Update trip with images
     try {
-      await base44.entities.Trip.update(trip.id, {
+      await Trip.update(trip.id, {
         images: images,
         image_url: images[0] // Set first image as main
       });

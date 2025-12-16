@@ -1,6 +1,6 @@
 import React from "react";
+import { Trip, User } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -44,10 +44,10 @@ export default function TravelerCarousel() {
         
         // Try to get users from User entity first (if authenticated)
         try {
-          const isAuthenticated = await base44.auth.isAuthenticated();
+          const isAuthenticated = await User.isAuthenticated();
           if (isAuthenticated) {
             console.log('[TravelerCarousel] User authenticated, trying User.list()');
-            const allUsers = await base44.entities.User.list();
+            const allUsers = await User.list();
             
             travelers = allUsers
               .filter(user => {
@@ -100,7 +100,7 @@ export default function TravelerCarousel() {
         if (travelers.length === 0) {
           console.log('[TravelerCarousel] Building travelers from trips (public data)');
           
-          const allTrips = await base44.entities.Trip.list();
+          const allTrips = await Trip.list();
           const userMap = new Map();
           
           allTrips.forEach(trip => {
