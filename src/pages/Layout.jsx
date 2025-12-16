@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { firebaseAuthService } from "@/api/firebaseAuth";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import Navbar from "./components/layout/Navbar";
@@ -17,21 +17,21 @@ export default function Layout({ children, currentPageName }) {
   React.useEffect(() => {
     const loadUser = async () => {
       try {
-        const isAuthenticated = await base44.auth.isAuthenticated();
-        
+        const isAuthenticated = await firebaseAuthService.isAuthenticated();
+
         if (!isAuthenticated) {
           setUser(null);
           setLoading(false);
           return;
         }
 
-        const currentUser = await base44.auth.me();
+        const currentUser = await firebaseAuthService.me();
         console.log('[Layout] User loaded successfully:', currentUser.id);
         setUser(currentUser);
 
         if (currentUser.picture && !currentUser.photo_url) {
           try {
-            await base44.auth.updateMe({
+            await firebaseAuthService.updateMe({
               photo_url: currentUser.picture,
               photo_updated_at: new Date().toISOString()
             });

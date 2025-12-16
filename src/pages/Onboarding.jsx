@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { firebaseAuthService } from "@/api/firebaseAuth";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -47,12 +47,12 @@ export default function Onboarding({ user: userProp, userLoading }) {
         } else if (!userLoading) {
           // If userProp is null/undefined and parent is not loading,
           // then check if user is authenticated and fetch if necessary.
-          const isAuthenticated = await base44.auth.isAuthenticated();
+          const isAuthenticated = await firebaseAuthService.isAuthenticated();
           if (!isAuthenticated) {
             navigate(createPageUrl("Home"));
             return;
           }
-          const currentUser = await base44.auth.me();
+          const currentUser = await firebaseAuthService.me();
           // Only update local state if it's different.
           if (user !== currentUser) {
             setUser(currentUser);
@@ -206,7 +206,7 @@ export default function Onboarding({ user: userProp, userLoading }) {
       updateData.consent_demographics = demographicConsentGiven;
       updateData.consent_location = !!(formData.city || formData.country);
 
-      await base44.auth.updateMe(updateData);
+      await firebaseAuthService.updateMe(updateData);
       navigate(createPageUrl("Home"));
     } catch (error) {
       console.error("Error updating profile:", error);

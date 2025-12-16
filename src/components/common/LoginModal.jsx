@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { firebaseAuthService } from "@/api/firebaseAuth";
 
 export default function LoginModal({ isOpen, onClose }) {
   const [loading, setLoading] = React.useState(false);
@@ -11,15 +11,12 @@ export default function LoginModal({ isOpen, onClose }) {
     try {
       setLoading(true);
       setError(false);
-      
-      // Small delay for smooth UX before redirect
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Capture current location to return after OAuth
-      const returnTo = window.location.pathname + window.location.search;
-      
-      // Call native Base44 OAuth method
-      base44.auth.redirectToLogin(returnTo);
+
+      // Sign in with Google popup
+      await firebaseAuthService.signInWithGoogle();
+
+      // Close modal on successful login
+      onClose();
     } catch (err) {
       console.error("Login error:", err);
       setError(true);

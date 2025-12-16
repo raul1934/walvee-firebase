@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { Trip } from "@/api/entities";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -38,7 +38,7 @@ export default function Home({ user, userLoading, openLoginModal }) {
   const { data: trips, isLoading } = useQuery({
     queryKey: ['trips'],
     queryFn: async () => {
-      const allTrips = await base44.entities.Trip.list("-created_date");
+      const allTrips = await Trip.list("-created_date");
       
       // Fisher-Yates shuffle algorithm to randomize order
       const shuffled = [...allTrips];
