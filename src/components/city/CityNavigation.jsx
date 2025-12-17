@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Map, Heart, Users, Sparkles, MapPin } from "lucide-react";
@@ -9,15 +8,23 @@ import PlaceCategoryFilter from "./PlaceCategoryFilter";
 import { requireAuth, createPageUrl } from "@/utils";
 
 const tabs = [
-{ id: "all", label: "All Trips", icon: Map },
-{ id: "places", label: "Top Places", icon: Sparkles },
-{ id: "locals", label: "Locals", icon: Users },
-{ id: "favorites", label: "Favorites", icon: Heart }];
+  { id: "all", label: "All Trips", icon: Map },
+  { id: "places", label: "Top Places", icon: Sparkles },
+  { id: "locals", label: "Locals", icon: Users },
+  { id: "favorites", label: "Favorites", icon: Heart },
+];
 
-
-export default function CityNavigation({ activeTab, onTabChange, cityName, user, openLoginModal, placeCategory, onCategoryChange }) {
+export default function CityNavigation({
+  activeTab,
+  onTabChange,
+  cityName,
+  user,
+  openLoginModal,
+  placeCategory,
+  onCategoryChange,
+}) {
   const navigate = useNavigate();
-  
+
   const handleCreateTrip = () => {
     requireAuth(user, openLoginModal, () => {
       navigate(createPageUrl("InspirePrompt"));
@@ -30,53 +37,59 @@ export default function CityNavigation({ activeTab, onTabChange, cityName, user,
       setIsSticky(window.scrollY > 280);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Split city name into city and country
-  const [city, country] = cityName?.split(',').map((s) => s.trim()) || [cityName, ''];
+  const [city, country] = cityName?.split(",").map((s) => s.trim()) || [
+    cityName,
+    "",
+  ];
 
   return (
-    <div className={`transition-all duration-300 ${
-    isSticky ?
-    'fixed top-16 left-0 right-0 z-50 bg-[#0C0E11]/95 backdrop-blur-xl border-b border-[#1F1F1F] shadow-lg' :
-    'relative'}`
-    }>
+    <div
+      className={`transition-all duration-300 ${
+        isSticky
+          ? "fixed top-16 left-0 right-0 z-50 bg-[#0C0E11]/95 backdrop-blur-xl border-b border-[#1F1F1F] shadow-lg"
+          : "relative"
+      }`}
+    >
       {/* Gradient Background - only when sticky */}
-      {isSticky &&
-      <>
+      {isSticky && (
+        <>
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0C0E11]/50 to-[#0C0E11]" />
-          
+
           {/* Animated Orbs */}
           <motion.div
-          className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }} />
+            className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.15, 0.25, 0.15],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
 
           <motion.div
-          className="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.25, 0.15, 0.25]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }} />
-
+            className="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/15 rounded-full blur-3xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.25, 0.15, 0.25],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+          />
         </>
-      }
+      )}
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col gap-3 py-3">
@@ -113,8 +126,8 @@ export default function CityNavigation({ activeTab, onTabChange, cityName, user,
                     onClick={() => onTabChange(tab.id)}
                     className={`flex flex-col items-center justify-center gap-1.5 px-6 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                        : 'bg-[#1A1B23] text-gray-400 hover:text-white hover:bg-[#2A2B35]'
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                        : "bg-[#1A1B23] text-gray-400 hover:text-white hover:bg-[#2A2B35]"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -138,7 +151,7 @@ export default function CityNavigation({ activeTab, onTabChange, cityName, user,
           {/* Category Filter - only shows when on places tab */}
           {activeTab === "places" && (
             <div className="border-t border-[#1F1F1F] pt-2.5 -mb-1">
-              <PlaceCategoryFilter 
+              <PlaceCategoryFilter
                 activeCategory={placeCategory}
                 onCategoryChange={onCategoryChange}
               />

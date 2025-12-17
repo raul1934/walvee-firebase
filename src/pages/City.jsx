@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Trip } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
@@ -18,16 +17,21 @@ import {
   getGooglePlacesService,
   cache,
   getMockPlaces,
-  CACHE_CONFIG
+  CACHE_CONFIG,
 } from "../components/utils/googlePlacesConfig";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyBYLf9H7ZYfGU5fZa2Fr6XfA9ZkBmJHTb4";
 
-console.log('[City Page] ===== MODULE LOADED =====');
+console.log("[City Page] ===== MODULE LOADED =====");
 
-export default function City({ user, openLoginModal, cityNameOverride, isModal = false }) {
-  console.log('[City Page] ===== FUNCTION CALLED =====');
-  console.log('[City Page] Received props:', {
+export default function City({
+  user,
+  openLoginModal,
+  cityNameOverride,
+  isModal = false,
+}) {
+  console.log("[City Page] ===== FUNCTION CALLED =====");
+  console.log("[City Page] Received props:", {
     hasUser: !!user,
     userId: user?.id,
     userEmail: user?.email,
@@ -35,11 +39,12 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     hasOpenLoginModal: !!openLoginModal,
     openLoginModalType: typeof openLoginModal,
     cityNameOverride: cityNameOverride,
-    isModal: isModal
+    isModal: isModal,
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  const cityName = cityNameOverride || urlParams.get("name") || urlParams.get("city");
+  const cityName =
+    cityNameOverride || urlParams.get("name") || urlParams.get("city");
 
   const [activeTab, setActiveTab] = useState("all");
   const [placeCategory, setPlaceCategory] = useState("all");
@@ -77,10 +82,10 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
       setIsNavSticky(window.scrollY > 280);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -88,11 +93,12 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
       const navHeight = 64;
       const offset = 20;
       const elementPosition = contentRef.current.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navHeight - offset;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - navHeight - offset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   }, [activeTab]);
@@ -103,37 +109,39 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
 
     const checkAndLoad = () => {
       if (window.google?.maps?.places?.PlacesService) {
-        console.log('[City] Google Maps API already loaded');
+        console.log("[City] Google Maps API already loaded");
         setGoogleMapsLoaded(true);
         scriptLoadedRef.current = true;
         return;
       }
 
-      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      const existingScript = document.querySelector(
+        'script[src*="maps.googleapis.com"]'
+      );
       if (existingScript) {
-        console.log('[City] Google Maps script exists, waiting for load...');
-        existingScript.addEventListener('load', () => {
-          console.log('[City] Google Maps loaded via existing script');
+        console.log("[City] Google Maps script exists, waiting for load...");
+        existingScript.addEventListener("load", () => {
+          console.log("[City] Google Maps loaded via existing script");
           setGoogleMapsLoaded(true);
           scriptLoadedRef.current = true;
         });
         return;
       }
 
-      console.log('[City] Loading Google Maps API...');
-      const script = document.createElement('script');
+      console.log("[City] Loading Google Maps API...");
+      const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
 
       script.onload = () => {
-        console.log('[City] Google Maps API loaded successfully');
+        console.log("[City] Google Maps API loaded successfully");
         setGoogleMapsLoaded(true);
         scriptLoadedRef.current = true;
       };
 
       script.onerror = (error) => {
-        console.error('[City] Error loading Google Maps API:', error);
+        console.error("[City] Error loading Google Maps API:", error);
       };
 
       document.head.appendChild(script);
@@ -142,28 +150,36 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     checkAndLoad();
   }, []);
 
-  const { data: trips = [], isLoading, refetch } = useQuery({
-    queryKey: ['cityTrips', cityName, offset],
+  const {
+    data: trips = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["cityTrips", cityName, offset],
     queryFn: async () => {
       if (!cityName) return [];
 
-      const allTrips = await Trip.list('-likes');
+      const allTrips = await Trip.list("-likes");
 
       const normalizedCityName = cityName.toLowerCase().trim();
-      const cityNameOnly = normalizedCityName.split(',')[0].trim();
+      const cityNameOnly = normalizedCityName.split(",")[0].trim();
 
-      let filtered = allTrips.filter(trip => {
-        const destination = trip.destination?.toLowerCase().trim() || '';
-        const destinationCity = destination.split(',')[0].trim();
+      let filtered = allTrips.filter((trip) => {
+        const destination = trip.destination?.toLowerCase().trim() || "";
+        const destinationCity = destination.split(",")[0].trim();
 
-        if (destinationCity === cityNameOnly || destination === normalizedCityName) {
+        if (
+          destinationCity === cityNameOnly ||
+          destination === normalizedCityName
+        ) {
           return true;
         }
 
-        const locations = trip.locations?.map(loc => loc.toLowerCase().trim()) || [];
+        const locations =
+          trip.locations?.map((loc) => loc.toLowerCase().trim()) || [];
 
-        return locations.some(loc => {
-          const locCity = loc.split(',')[0].trim();
+        return locations.some((loc) => {
+          const locCity = loc.split(",")[0].trim();
           return locCity === cityNameOnly || loc === normalizedCityName;
         });
       });
@@ -190,10 +206,15 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingRef.current && !isLoading) {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !loadingRef.current &&
+          !isLoading
+        ) {
           loadingRef.current = true;
           setTimeout(() => {
-            setOffset(prev => prev + LIMIT);
+            setOffset((prev) => prev + LIMIT);
             loadingRef.current = false;
           }, 300);
         }
@@ -225,9 +246,9 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     const placeCount = {};
     const placeDetails = {};
 
-    trips.forEach(trip => {
-      trip.itinerary?.forEach(day => {
-        day.places?.forEach(place => {
+    trips.forEach((trip) => {
+      trip.itinerary?.forEach((day) => {
+        day.places?.forEach((place) => {
           if (!place.name) return;
 
           const key = place.place_id || place.name;
@@ -253,7 +274,7 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     const placesFromTrips = Object.entries(placeCount)
       .map(([key, count]) => ({
         ...placeDetails[key],
-        mentions: count
+        mentions: count,
       }))
       .sort((a, b) => b.mentions - a.mentions);
 
@@ -267,229 +288,346 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     }
 
     setIsEnrichingTripPlaces(true);
-    const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+    const service = new window.google.maps.places.PlacesService(
+      document.createElement("div")
+    );
 
-    Promise.all(topPlaces.map(place =>
-      new Promise((resolve) => {
-        if (place.photo && place.rating) {
-          resolve(place);
-          return;
-        }
-
-        if (place.place_id) {
-          service.getDetails(
-            {
-              placeId: place.place_id,
-              fields: ['name', 'place_id', 'rating', 'user_ratings_total', 'price_level', 'photos', 'formatted_address']
-            },
-            (result, status) => {
-              if (status === window.google.maps.places.PlacesServiceStatus.OK && result) {
-                resolve({
-                  ...place,
-                  rating: result.rating || place.rating,
-                  user_ratings_total: result.user_ratings_total || place.user_ratings_total,
-                  price_level: result.price_level !== undefined ? result.price_level : place.price_level,
-                  photo: result.photos?.[0]?.getUrl({ maxWidth: 400, maxHeight: 400 }) || place.photo,
-                  photos: result.photos?.map(p => p.getUrl({ maxWidth: 800, maxHeight: 800 })) || place.photos,
-                  address: result.formatted_address || place.address
-                });
-              } else {
-                resolve(place);
-              }
-            }
-          );
-        } else {
-          const request = {
-            query: `${place.name}, ${place.address || cityName}`,
-            fields: ['name', 'place_id', 'rating', 'user_ratings_total', 'price_level', 'photos', 'formatted_address']
-          };
-
-          service.textSearch(request, (results, status) => {
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-              const result = results[0];
-
-              const resultAddress = result.formatted_address?.toLowerCase() || '';
-              const cityNameOnly = cityName.split(',')[0].trim().toLowerCase();
-
-              if (resultAddress.includes(cityNameOnly)) {
-                resolve({
-                  ...place,
-                  place_id: result.place_id || place.place_id,
-                  rating: result.rating || place.rating,
-                  user_ratings_total: result.user_ratings_total || place.user_ratings_total,
-                  price_level: result.price_level !== undefined ? result.price_level : place.price_level,
-                  photo: result.photos?.[0]?.getUrl({ maxWidth: 400, maxHeight: 400 }) || place.photo,
-                  photos: result.photos?.map(p => p.getUrl({ maxWidth: 800, maxHeight: 800 })) || place.photos,
-                  address: result.formatted_address || place.address
-                });
-              } else {
-                resolve(place);
-              }
-            } else {
+    Promise.all(
+      topPlaces.map(
+        (place) =>
+          new Promise((resolve) => {
+            if (place.photo && place.rating) {
               resolve(place);
+              return;
             }
-          });
-        }
+
+            if (place.place_id) {
+              service.getDetails(
+                {
+                  placeId: place.place_id,
+                  fields: [
+                    "name",
+                    "place_id",
+                    "rating",
+                    "user_ratings_total",
+                    "price_level",
+                    "photos",
+                    "formatted_address",
+                  ],
+                },
+                (result, status) => {
+                  if (
+                    status ===
+                      window.google.maps.places.PlacesServiceStatus.OK &&
+                    result
+                  ) {
+                    resolve({
+                      ...place,
+                      rating: result.rating || place.rating,
+                      user_ratings_total:
+                        result.user_ratings_total || place.user_ratings_total,
+                      price_level:
+                        result.price_level !== undefined
+                          ? result.price_level
+                          : place.price_level,
+                      photo:
+                        result.photos?.[0]?.getUrl({
+                          maxWidth: 400,
+                          maxHeight: 400,
+                        }) || place.photo,
+                      photos:
+                        result.photos?.map((p) =>
+                          p.getUrl({ maxWidth: 800, maxHeight: 800 })
+                        ) || place.photos,
+                      address: result.formatted_address || place.address,
+                    });
+                  } else {
+                    resolve(place);
+                  }
+                }
+              );
+            } else {
+              const request = {
+                query: `${place.name}, ${place.address || cityName}`,
+                fields: [
+                  "name",
+                  "place_id",
+                  "rating",
+                  "user_ratings_total",
+                  "price_level",
+                  "photos",
+                  "formatted_address",
+                ],
+              };
+
+              service.textSearch(request, (results, status) => {
+                if (
+                  status === window.google.maps.places.PlacesServiceStatus.OK &&
+                  results &&
+                  results[0]
+                ) {
+                  const result = results[0];
+
+                  const resultAddress =
+                    result.formatted_address?.toLowerCase() || "";
+                  const cityNameOnly = cityName
+                    .split(",")[0]
+                    .trim()
+                    .toLowerCase();
+
+                  if (resultAddress.includes(cityNameOnly)) {
+                    resolve({
+                      ...place,
+                      place_id: result.place_id || place.place_id,
+                      rating: result.rating || place.rating,
+                      user_ratings_total:
+                        result.user_ratings_total || place.user_ratings_total,
+                      price_level:
+                        result.price_level !== undefined
+                          ? result.price_level
+                          : place.price_level,
+                      photo:
+                        result.photos?.[0]?.getUrl({
+                          maxWidth: 400,
+                          maxHeight: 400,
+                        }) || place.photo,
+                      photos:
+                        result.photos?.map((p) =>
+                          p.getUrl({ maxWidth: 800, maxHeight: 800 })
+                        ) || place.photos,
+                      address: result.formatted_address || place.address,
+                    });
+                  } else {
+                    resolve(place);
+                  }
+                } else {
+                  resolve(place);
+                }
+              });
+            }
+          })
+      )
+    )
+      .then((enriched) => {
+        setEnrichedTripPlaces(enriched);
+        setIsEnrichingTripPlaces(false);
       })
-    )).then((enriched) => {
-      setEnrichedTripPlaces(enriched);
-      setIsEnrichingTripPlaces(false);
-    }).catch((error) => {
-      console.error('Error enriching trip places:', error);
-      setEnrichedTripPlaces(topPlaces);
-      setIsEnrichingTripPlaces(false);
-    });
+      .catch((error) => {
+        console.error("Error enriching trip places:", error);
+        setEnrichedTripPlaces(topPlaces);
+        setIsEnrichingTripPlaces(false);
+      });
   }, [topPlaces, cityName]);
 
   // Updated Google Places query with feature flag
-  const { data: googlePlaces = [], isLoading: isLoadingGooglePlaces } = useQuery({
-    queryKey: ['googlePlaces', cityName, placeCategory, activeTab, googleMapsLoaded],
-    queryFn: async () => {
-      // Check if Google Places is enabled via feature flag
-      if (!shouldUseGooglePlaces()) {
-        console.log('[City] Google Places API desabilitada - usando dados mock');
-        return getMockPlaces(cityName);
-      }
-
-      if (!cityName || !googleMapsLoaded) {
-        console.log('[City] Skipping Google Places search:', { cityName, googleMapsLoaded });
-        return [];
-      }
-
-      try {
-        // Check cache first
-        const cacheKey = `city_${cityName}_${placeCategory}`;
-        const cached = cache.get(cacheKey);
-
-        if (cached) {
-          console.log('[City] Usando cache do Google Places');
-          return cached;
+  const { data: googlePlaces = [], isLoading: isLoadingGooglePlaces } =
+    useQuery({
+      queryKey: [
+        "googlePlaces",
+        cityName,
+        placeCategory,
+        activeTab,
+        googleMapsLoaded,
+      ],
+      queryFn: async () => {
+        // Check if Google Places is enabled via feature flag
+        if (!shouldUseGooglePlaces()) {
+          console.log(
+            "[City] Google Places API desabilitada - usando dados mock"
+          );
+          return getMockPlaces(cityName);
         }
 
-        console.log('[City] Fetching Google Places...');
-        const service = getGooglePlacesService();
-
-        if (!service) {
-          console.warn('[City] Service não disponível');
+        if (!cityName || !googleMapsLoaded) {
+          console.log("[City] Skipping Google Places search:", {
+            cityName,
+            googleMapsLoaded,
+          });
           return [];
         }
 
-        let query;
-        if (placeCategory === "all") {
-          query = `top places in ${cityName}`;
-        } else {
-          query = `${placeCategory.replace(/_/g, ' ')} in ${cityName}`;
-        }
+        try {
+          // Check cache first
+          const cacheKey = `city_${cityName}_${placeCategory}`;
+          const cached = cache.get(cacheKey);
 
-        console.log('[City] Google Places query:', query);
+          if (cached) {
+            console.log("[City] Usando cache do Google Places");
+            return cached;
+          }
 
-        return new Promise((resolve) => {
-          service.textSearch(
-            { query: query },
-            async (results, status) => {
-              console.log('[City] Google Places response:', { status, count: results?.length });
+          console.log("[City] Fetching Google Places...");
+          const service = getGooglePlacesService();
 
-              if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-                const cityParts = cityName.split(',').map(p => p.trim().toLowerCase());
+          if (!service) {
+            console.warn("[City] Service não disponível");
+            return [];
+          }
+
+          let query;
+          if (placeCategory === "all") {
+            query = `top places in ${cityName}`;
+          } else {
+            query = `${placeCategory.replace(/_/g, " ")} in ${cityName}`;
+          }
+
+          console.log("[City] Google Places query:", query);
+
+          return new Promise((resolve) => {
+            service.textSearch({ query: query }, async (results, status) => {
+              console.log("[City] Google Places response:", {
+                status,
+                count: results?.length,
+              });
+
+              if (
+                status === window.google.maps.places.PlacesServiceStatus.OK &&
+                results
+              ) {
+                const cityParts = cityName
+                  .split(",")
+                  .map((p) => p.trim().toLowerCase());
                 const cityOnly = cityParts[0];
 
-                const filteredResults = results.filter(place => {
-                  const placeAddress = place.formatted_address?.toLowerCase() || '';
+                const filteredResults = results.filter((place) => {
+                  const placeAddress =
+                    place.formatted_address?.toLowerCase() || "";
                   return placeAddress.includes(cityOnly);
                 });
 
-                console.log('[City] Filtered Google Places:', filteredResults.length);
+                console.log(
+                  "[City] Filtered Google Places:",
+                  filteredResults.length
+                );
 
                 const detailedPlaces = await Promise.all(
-                  filteredResults.map(place =>
-                    new Promise((resolveDetail) => {
-                      setTimeout(() => {
-                        service.getDetails(
-                          {
-                            placeId: place.place_id,
-                            fields: ['name', 'formatted_address', 'place_id', 'rating', 'user_ratings_total', 'price_level', 'types', 'photos', 'opening_hours']
-                          },
-                          (detailResult, detailStatus) => {
-                            if (detailStatus === window.google.maps.places.PlacesServiceStatus.OK && detailResult) {
-                              resolveDetail({
-                                name: detailResult.name,
-                                address: detailResult.formatted_address,
-                                place_id: detailResult.place_id,
-                                rating: detailResult.rating,
-                                user_ratings_total: detailResult.user_ratings_total,
-                                price_level: detailResult.price_level,
-                                types: detailResult.types,
-                                photos: detailResult.photos?.map(p => p.getUrl({ maxWidth: 800, maxHeight: 800 })) || [],
-                                photo: detailResult.photos?.[0]?.getUrl({ maxWidth: 400, maxHeight: 400 }) || null,
-                                opening_hours: detailResult.opening_hours,
-                                mentions: 0,
-                                source: 'google'
-                              });
-                            } else {
-                              console.warn(`[City] Failed to fetch details for place ID ${place.place_id}. Status: ${detailStatus}`);
-                              resolveDetail({
-                                name: place.name,
-                                address: place.formatted_address,
-                                place_id: place.place_id,
-                                rating: place.rating,
-                                user_ratings_total: place.user_ratings_total,
-                                price_level: place.price_level,
-                                types: place.types,
-                                photos: [],
-                                photo: null,
-                                mentions: 0,
-                                source: 'google'
-                              });
+                  filteredResults.map(
+                    (place) =>
+                      new Promise((resolveDetail) => {
+                        setTimeout(() => {
+                          service.getDetails(
+                            {
+                              placeId: place.place_id,
+                              fields: [
+                                "name",
+                                "formatted_address",
+                                "place_id",
+                                "rating",
+                                "user_ratings_total",
+                                "price_level",
+                                "types",
+                                "photos",
+                                "opening_hours",
+                              ],
+                            },
+                            (detailResult, detailStatus) => {
+                              if (
+                                detailStatus ===
+                                  window.google.maps.places.PlacesServiceStatus
+                                    .OK &&
+                                detailResult
+                              ) {
+                                resolveDetail({
+                                  name: detailResult.name,
+                                  address: detailResult.formatted_address,
+                                  place_id: detailResult.place_id,
+                                  rating: detailResult.rating,
+                                  user_ratings_total:
+                                    detailResult.user_ratings_total,
+                                  price_level: detailResult.price_level,
+                                  types: detailResult.types,
+                                  photos:
+                                    detailResult.photos?.map((p) =>
+                                      p.getUrl({
+                                        maxWidth: 800,
+                                        maxHeight: 800,
+                                      })
+                                    ) || [],
+                                  photo:
+                                    detailResult.photos?.[0]?.getUrl({
+                                      maxWidth: 400,
+                                      maxHeight: 400,
+                                    }) || null,
+                                  opening_hours: detailResult.opening_hours,
+                                  mentions: 0,
+                                  source: "google",
+                                });
+                              } else {
+                                console.warn(
+                                  `[City] Failed to fetch details for place ID ${place.place_id}. Status: ${detailStatus}`
+                                );
+                                resolveDetail({
+                                  name: place.name,
+                                  address: place.formatted_address,
+                                  place_id: place.place_id,
+                                  rating: place.rating,
+                                  user_ratings_total: place.user_ratings_total,
+                                  price_level: place.price_level,
+                                  types: place.types,
+                                  photos: [],
+                                  photo: null,
+                                  mentions: 0,
+                                  source: "google",
+                                });
+                              }
                             }
-                          }
-                        );
-                      }, 50);
-                    })
+                          );
+                        }, 50);
+                      })
                   )
                 );
 
-                console.log('[City] Detailed Google Places:', detailedPlaces.length);
+                console.log(
+                  "[City] Detailed Google Places:",
+                  detailedPlaces.length
+                );
 
                 // Cache results
                 cache.set(cacheKey, detailedPlaces, CACHE_CONFIG.CITY_PLACES);
 
                 resolve(detailedPlaces);
               } else {
-                console.warn(`[City] Text search failed for query "${query}". Status: ${status}`);
+                console.warn(
+                  `[City] Text search failed for query "${query}". Status: ${status}`
+                );
                 resolve([]);
               }
-            }
-          );
-        });
-      } catch (error) {
-        console.error('[City] Error fetching Google Places:', error);
-        return [];
-      }
-    },
-    enabled: !!cityName && activeTab === "places" && googleMapsLoaded,
-    staleTime: 24 * 60 * 60 * 1000,
-    retry: 1,
-  });
+            });
+          });
+        } catch (error) {
+          console.error("[City] Error fetching Google Places:", error);
+          return [];
+        }
+      },
+      enabled: !!cityName && activeTab === "places" && googleMapsLoaded,
+      staleTime: 24 * 60 * 60 * 1000,
+      retry: 1,
+    });
 
   const combinedPlacesAll = React.useMemo(() => {
-    const tripsPlaces = enrichedTripPlaces.filter(p => p.mentions > 0);
-    const googleOnly = googlePlaces
-      .filter(gp => !tripsPlaces.some(tp => tp.place_id === gp.place_id || tp.name === gp.name));
+    const tripsPlaces = enrichedTripPlaces.filter((p) => p.mentions > 0);
+    const googleOnly = googlePlaces.filter(
+      (gp) =>
+        !tripsPlaces.some(
+          (tp) => tp.place_id === gp.place_id || tp.name === gp.name
+        )
+    );
 
     let combined = [...tripsPlaces, ...googleOnly];
 
-    const cityNameOnly = cityName?.split(',')[0].trim().toLowerCase() || '';
+    const cityNameOnly = cityName?.split(",")[0].trim().toLowerCase() || "";
 
-    combined = combined.filter(place => {
-      const placeAddress = place.address?.toLowerCase() || '';
+    combined = combined.filter((place) => {
+      const placeAddress = place.address?.toLowerCase() || "";
       return placeAddress.includes(cityNameOnly);
     });
 
     if (placeCategory !== "all") {
-      combined = combined.filter(place =>
-        place.types?.some(type =>
-          type.toLowerCase().includes(placeCategory.toLowerCase()) ||
-          placeCategory.toLowerCase().includes(type.toLowerCase())
+      combined = combined.filter((place) =>
+        place.types?.some(
+          (type) =>
+            type.toLowerCase().includes(placeCategory.toLowerCase()) ||
+            placeCategory.toLowerCase().includes(type.toLowerCase())
         )
       );
     }
@@ -531,10 +669,16 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMorePlaces && !placesLoadingRef.current && !isLoadingGooglePlaces && !isEnrichingTripPlaces) {
+        if (
+          entries[0].isIntersecting &&
+          hasMorePlaces &&
+          !placesLoadingRef.current &&
+          !isLoadingGooglePlaces &&
+          !isEnrichingTripPlaces
+        ) {
           placesLoadingRef.current = true;
           setTimeout(() => {
-            setPlacesOffset(prev => prev + PLACES_LIMIT);
+            setPlacesOffset((prev) => prev + PLACES_LIMIT);
             placesLoadingRef.current = false;
           }, 300);
         }
@@ -557,10 +701,11 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     if (!trips.length) return [];
 
     const cityCount = {};
-    trips.forEach(trip => {
+    trips.forEach((trip) => {
       const allCities = [trip.destination, ...(trip.locations || [])];
-      allCities.forEach(city => {
-        if (!city || city.toLowerCase().includes(cityName?.toLowerCase())) return;
+      allCities.forEach((city) => {
+        if (!city || city.toLowerCase().includes(cityName?.toLowerCase()))
+          return;
         cityCount[city] = (cityCount[city] || 0) + 1;
       });
     });
@@ -575,7 +720,7 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     if (!trips.length) return [];
 
     const authorCount = {};
-    trips.forEach(trip => {
+    trips.forEach((trip) => {
       const authorId = trip.created_by;
       if (!authorCount[authorId]) {
         authorCount[authorId] = {
@@ -583,7 +728,7 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
           name: trip.author_name,
           avatar: trip.author_photo,
           tripsCount: 0,
-          followers: 0
+          followers: 0,
         };
       }
       authorCount[authorId].tripsCount++;
@@ -607,22 +752,22 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
   };
 
   const handlePlaceClick = (place) => {
-    console.log('[City Page] ===== handlePlaceClick =====');
-    console.log('[City Page] Place clicked:', {
+    console.log("[City Page] ===== handlePlaceClick =====");
+    console.log("[City Page] Place clicked:", {
       placeName: place.name,
       hasUser: !!user,
       userId: user?.id,
       userName: user?.preferred_name || user?.full_name,
-      hasOpenLoginModal: !!openLoginModal
+      hasOpenLoginModal: !!openLoginModal,
     });
 
-    console.log('[City Page] Setting selectedPlace and opening modal');
+    console.log("[City Page] Setting selectedPlace and opening modal");
     setSelectedPlace(place);
     setIsPlaceModalOpen(true);
   };
 
   const handleClosePlaceModal = () => {
-    console.log('[City Page] Closing PlaceModal');
+    console.log("[City Page] Closing PlaceModal");
     setIsPlaceModalOpen(false);
     setTimeout(() => setSelectedPlace(null), 300);
   };
@@ -635,18 +780,22 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
     );
   }
 
-  console.log('[City Page] ===== ABOUT TO RENDER =====');
-  console.log('[City Page] PlaceModal state:', {
+  console.log("[City Page] ===== ABOUT TO RENDER =====");
+  console.log("[City Page] PlaceModal state:", {
     hasPlace: !!selectedPlace,
     placeName: selectedPlace?.name,
     isOpen: isPlaceModalOpen,
     hasUser: !!user,
     userId: user?.id,
-    hasOpenLoginModal: !!openLoginModal
+    hasOpenLoginModal: !!openLoginModal,
   });
 
   return (
-    <div className={`min-h-screen bg-[#0C0E11] text-white ${isModal ? '' : 'pt-16'}`}>
+    <div
+      className={`min-h-screen bg-[#0C0E11] text-white ${
+        isModal ? "" : "pt-16"
+      }`}
+    >
       <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
@@ -723,15 +872,23 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
             <CityTopPlaces
               places={allPlaces}
               cityName={cityName}
-              isLoading={(isLoadingGooglePlaces || isEnrichingTripPlaces) && placesOffset === 0}
+              isLoading={
+                (isLoadingGooglePlaces || isEnrichingTripPlaces) &&
+                placesOffset === 0
+              }
               onPlaceClick={handlePlaceClick}
             />
 
-            {hasMorePlaces && !isLoadingGooglePlaces && !isEnrichingTripPlaces && (
-              <div ref={placesObserverRef} className="py-12 flex justify-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-2 border-purple-500 border-t-transparent" />
-              </div>
-            )}
+            {hasMorePlaces &&
+              !isLoadingGooglePlaces &&
+              !isEnrichingTripPlaces && (
+                <div
+                  ref={placesObserverRef}
+                  className="py-12 flex justify-center"
+                >
+                  <div className="animate-spin rounded-full h-10 w-10 border-2 border-purple-500 border-t-transparent" />
+                </div>
+              )}
 
             {!hasMorePlaces && allPlaces.length > 0 && (
               <p className="text-center text-gray-500 py-12">
@@ -739,35 +896,41 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
               </p>
             )}
 
-            {!isLoadingGooglePlaces && !isEnrichingTripPlaces && allPlaces.length === 0 && !hasMorePlaces && combinedPlacesAll.length === 0 && (
-              <div className="container mx-auto px-6 text-center py-20">
-                <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <MapPin className="w-10 h-10 text-purple-400" />
+            {!isLoadingGooglePlaces &&
+              !isEnrichingTripPlaces &&
+              allPlaces.length === 0 &&
+              !hasMorePlaces &&
+              combinedPlacesAll.length === 0 && (
+                <div className="container mx-auto px-6 text-center py-20">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <MapPin className="w-10 h-10 text-purple-400" />
+                    </div>
+                    <h3 className="2xl font-bold text-white mb-4">
+                      No places found
+                    </h3>
+                    <p className="text-gray-400 mb-4">
+                      No{" "}
+                      {placeCategory === "all"
+                        ? "places"
+                        : placeCategory.replace(/_/g, " ")}{" "}
+                      found in {cityName}.
+                    </p>
+                    <button
+                      onClick={() => setPlaceCategory("all")}
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      Show all places
+                    </button>
                   </div>
-                  <h3 className="2xl font-bold text-white mb-4">
-                    No places found
-                  </h3>
-                  <p className="text-gray-400 mb-4">
-                    No {placeCategory === "all" ? "places" : placeCategory.replace(/_/g, ' ')} found in {cityName}.
-                  </p>
-                  <button
-                    onClick={() => setPlaceCategory("all")}
-                    className="text-blue-400 hover:text-blue-300 underline"
-                  >
-                    Show all places
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
           </>
         )}
 
         {activeTab === "locals" && (
           <div className="container mx-auto px-6">
-            <CityLocals
-              cityName={cityName}
-            />
+            <CityLocals cityName={cityName} />
           </div>
         )}
 

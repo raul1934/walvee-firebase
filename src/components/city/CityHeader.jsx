@@ -7,7 +7,7 @@ import { requireAuth, createPageUrl } from "@/utils";
 
 export default function CityHeader({ cityName, user, openLoginModal }) {
   const navigate = useNavigate();
-  
+
   const handleCreateTrip = () => {
     requireAuth(user, openLoginModal, () => {
       navigate(createPageUrl("InspirePrompt"));
@@ -18,31 +18,31 @@ export default function CityHeader({ cityName, user, openLoginModal }) {
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 opacity-20" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0C0E11]/50 to-[#0C0E11]" />
-      
+
       {/* Animated Orbs */}
-      <motion.div 
+      <motion.div
         className="absolute top-10 left-1/4 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl"
-        animate={{ 
+        animate={{
           scale: [1, 1.2, 1],
-          opacity: [0.15, 0.25, 0.15]
+          opacity: [0.15, 0.25, 0.15],
         }}
-        transition={{ 
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      <motion.div 
-        className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl"
-        animate={{ 
-          scale: [1.2, 1, 1.2],
-          opacity: [0.25, 0.15, 0.25]
-        }}
-        transition={{ 
+        transition={{
           duration: 8,
           repeat: Infinity,
           ease: "easeInOut",
-          delay: 1
+        }}
+      />
+      <motion.div
+        className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl"
+        animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.25, 0.15, 0.25],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
         }}
       />
 
