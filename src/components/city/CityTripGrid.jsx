@@ -64,19 +64,14 @@ export default function CityTripGrid({ trips, isLoading, currentUserId }) {
                 )}
 
                 {/* Author Avatar Overlay */}
-                <Link
-                  to={createProfileUrl(trip.created_by)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute top-3 left-3 hover:scale-110 transition-transform"
-                >
+                <div className="absolute top-3 left-3 hover:scale-110 transition-transform">
                   <UserAvatar
                     src={trip.author_photo}
                     name={trip.author_name}
                     size="md"
                     ring
-                    userId={trip.created_by}
                   />
-                </Link>
+                </div>
               </div>
 
               {/* Content */}

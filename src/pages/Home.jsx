@@ -25,6 +25,11 @@ export default function Home({ user, userLoading, openLoginModal }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Debug: Track hover state changes
+  useEffect(() => {
+    console.log('[Home] ⚡ isHoveringCards changed to:', isHoveringCards);
+  }, [isHoveringCards]);
+
   // Reset all trip cards to default state when component mounts
   useEffect(() => {
     console.log('[Home] 🧹 Cleaning sessionStorage and cache');
@@ -114,12 +119,12 @@ export default function Home({ user, userLoading, openLoginModal }) {
     return new Set(userLikes.map(like => like.trip_id));
   }, [userLikes]);
 
-  // Function to invalidate the user likes query, triggering a refetch
-  const invalidateUserLikes = () => {
+  // Function to invalidate the user likes query, triggering a refetch - memoized
+  const invalidateUserLikes = React.useCallback(() => {
     if (user?.id) {
       queryClient.invalidateQueries(['userLikes', user.id]);
     }
-  };
+  }, [user?.id, queryClient]);
 
   useEffect(() => {
     const checkScroll = () => {
@@ -137,6 +142,12 @@ export default function Home({ user, userLoading, openLoginModal }) {
     if (scrollElement) {
       scrollElement.addEventListener('scroll', checkScroll);
       window.addEventListener('resize', checkScroll);
+      
+      // Set initial scroll position to middle set for endless loop
+      if (trips.length > 0 && scrollElement.scrollTop === 0) {
+        const singleSetHeight = scrollElement.scrollHeight / 3;
+        scrollElement.scrollTop = singleSetHeight;
+      }
     }
 
     return () => {
@@ -154,11 +165,15 @@ export default function Home({ user, userLoading, openLoginModal }) {
     const autoScroll = setInterval(() => {
       if (scrollElement && !isHoveringCards) {
         const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-        const isAtBottom = scrollHeight - scrollTop - clientHeight < 10;
-
-        if (isAtBottom) {
-          // Restart from top when reaching bottom
-          scrollElement.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Calculate the height of one set of trips (original array)
+        const singleSetHeight = scrollHeight / 3; // Since we're tripling the content
+        
+        // Reset position when reaching the end of the second set to create endless loop
+        if (scrollTop >= singleSetHeight * 2) {
+          scrollElement.scrollTop = singleSetHeight;
+        } else if (scrollTop <= 0) {
+          scrollElement.scrollTop = singleSetHeight;
         } else {
           scrollElement.scrollBy({ top: 2, behavior: 'auto' });
         }
@@ -168,7 +183,7 @@ export default function Home({ user, userLoading, openLoginModal }) {
     return () => clearInterval(autoScroll);
   }, [trips, isHoveringCards, dragScrollRef]);
 
-  const scrollToNextCard = () => {
+  const scrollToNextCard = React.useCallback(() => {
     const element = dragScrollRef.current || scrollRef.current;
     if (element) {
       element.scrollBy({
@@ -176,13 +191,13 @@ export default function Home({ user, userLoading, openLoginModal }) {
         behavior: 'smooth'
       });
     }
-  };
+  }, [dragScrollRef]);
 
-  const handleRestrictedAction = () => {
+  const handleRestrictedAction = React.useCallback(() => {
     if (openLoginModal) {
       openLoginModal();
     }
-  };
+  }, [openLoginModal]);
 
   return (
     <div className="h-screen overflow-hidden pt-16">
@@ -200,8 +215,14 @@ export default function Home({ user, userLoading, openLoginModal }) {
           <div className="h-full flex flex-col lg:flex-row gap-8 py-8 overflow-hidden">
             <div
               className="relative lg:w-[420px] flex-shrink-0 h-full overflow-hidden"
-              onMouseEnter={() => setIsHoveringCards(true)}
-              onMouseLeave={() => setIsHoveringCards(false)}>
+              onMouseEnter={() => {
+                console.log('[Home] 🖱️ Mouse ENTER - setting isHoveringCards to true');
+                setIsHoveringCards(true);
+              }}
+              onMouseLeave={() => {
+                console.log('[Home] 🖱️ Mouse LEAVE - setting isHoveringCards to false');
+                setIsHoveringCards(false);
+              }}>
 
               <div
                 ref={(el) => {
@@ -225,9 +246,9 @@ export default function Home({ user, userLoading, openLoginModal }) {
                       <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
                     </div>
                   ) : trips.length > 0 ? (
-                    trips.map((trip) => (
+                    [...trips, ...trips, ...trips].map((trip, index) => (
                       <TripCard
-                        key={trip.id}
+                        key={`${trip.id}-${index}`}
                         trip={trip}
                         isLoggedIn={!!user}
                         isFavorited={userLikedTripIds.has(trip.id)}

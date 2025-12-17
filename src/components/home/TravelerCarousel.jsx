@@ -244,7 +244,6 @@ export default function TravelerCarousel() {
                     src={traveler.photo_url || traveler.picture}
                     name={traveler.preferred_name || traveler.full_name}
                     size="xl"
-                    userId={traveler.id}
                   />
                 </div>
                 {traveler.score > 20 && (

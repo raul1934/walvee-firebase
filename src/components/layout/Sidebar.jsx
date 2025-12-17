@@ -1,8 +1,10 @@
 import React from "react";
 import { User } from "@/api/entities";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { Link, useNavigate } from "react-router-dom";
+import { createPageUrl, createProfileUrl } from "@/utils";
 export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
+  const navigate = useNavigate();
+  
   const handleSignOut = async () => {
     try {
       onClose();
@@ -46,7 +48,7 @@ export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
               {/* Navigation Links */}
               <nav className="flex-1 flex flex-col">
                 <Link
-                  to={createPageUrl("Home")}
+                  to={createProfileUrl()}
                   className="text-white text-base py-[7px] hover:opacity-85 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#1E66FF] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] rounded"
                   onClick={onClose}
                 >
@@ -54,7 +56,7 @@ export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
                 </Link>
 
                 <Link
-                  to={createPageUrl("Home")}
+                  to={createPageUrl("EditProfile")}
                   className="text-white text-base py-[7px] hover:opacity-85 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#1E66FF] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] rounded"
                   onClick={onClose}
                 >

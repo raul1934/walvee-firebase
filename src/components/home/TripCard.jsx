@@ -22,7 +22,7 @@ import StealModal from "../trip/StealModal";
 import CitiesScroller from "../common/CitiesScroller";
 import { getTripCities } from "../utils/cityFormatter";
 
-export default function TripCard({
+export default React.memo(function TripCard({
   trip,
   isLoggedIn = true,
   onRestrictedAction,
@@ -31,6 +31,9 @@ export default function TripCard({
   onFavoriteToggle,
   isLoadingLikes = false,
 }) {
+  // Debug: Track re-renders
+  console.log('[TripCard] Rendering trip:', trip.id, trip.title?.slice(0, 30));
+
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
   const [viewMode, setViewMode] = React.useState("photos");
   const [imageErrors, setImageErrors] = React.useState(new Set());
@@ -63,13 +66,16 @@ export default function TripCard({
     setImageErrors(new Set());
   }, [trip.id]);
 
-  // Get like status from prop (already fetched in parent)
-  const isLiked = userLikedTripIds?.has(trip.id) || false;
+  // Get like status from prop (already fetched in parent) - memoized
+  const isLiked = React.useMemo(() => {
+    return userLikedTripIds?.has(trip.id) || false;
+  }, [userLikedTripIds, trip.id]);
+
   const likesCount = trip.likes || 0;
   const stealsCount = trip.steals || 0;
   const sharesCount = trip.shares || 0;
 
-  const cities = getTripCities(trip);
+  const cities = React.useMemo(() => getTripCities(trip), [trip]);
 
   const likeMutation = useMutation({
     mutationFn: async (shouldLike) => {
@@ -237,43 +243,30 @@ export default function TripCard({
 
   return (
     <>
-      <Link
-        to={createPageUrl("TripDetails") + `?id=${trip.id}`}
-        className="block"
-      >
-        <div className="bg-[#1A1B23] rounded-3xl overflow-hidden border border-[#2A2B35] hover:border-blue-500/30 transition-all duration-300 cursor-pointer">
-          {/* User Info Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#2A2B35]">
-            <div className="flex items-center gap-3">
-              {/* User Avatar with profile link */}
-              <Link
-                to={createProfileUrl(trip.created_by)}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <UserAvatar
-                  src={trip.author_photo}
-                  name={trip.author_name || "Arthur Gonçalves"}
-                  userId={trip.created_by}
-                  size="md"
-                />
-              </Link>
-              <div>
-                {/* User name with profile link */}
-                <Link
-                  to={createProfileUrl(trip.created_by)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-semibold text-white text-sm hover:text-blue-400 transition-colors"
-                >
-                  {trip.author_name || "Arthur Gonçalves"}
-                </Link>
-                <p className="text-xs text-gray-400">
-                  {trip.start_date &&
-                    format(new Date(trip.start_date), "dd MMM yyyy", {
-                      locale: pt,
-                    })}{" "}
-                  • {trip.duration_days} days
-                </p>
+      <Link to={createPageUrl("TripDetails") + `?id=${trip.id}`}>
+        <div className="bg-[#1A1B23] rounded-3xl overflow-hidden border border-[#2A2B35] hover:border-blue-500/30 transition-all duration-300">
+        {/* User Info Header */}
+        <div className="flex items-center justify-between p-4 border-b border-[#2A2B35]">
+          <div className="flex items-center gap-3">
+            {/* User Avatar - not clickable to avoid nested links */}
+            <UserAvatar
+              src={trip.author_photo}
+              name={trip.author_name || "Arthur Gonçalves"}
+              size="md"
+            />
+            <div>
+              {/* User name - not a link to avoid nested anchors */}
+              <div className="font-semibold text-white text-sm">
+                {trip.author_name || "Arthur Gonçalves"}
               </div>
+              <p className="text-xs text-gray-400">
+                {trip.start_date &&
+                  format(new Date(trip.start_date), "dd MMM yyyy", {
+                    locale: pt,
+                  })}{" "}
+                • {trip.duration_days} days
+              </p>
+            </div>
             </div>
           </div>
 
@@ -344,14 +337,14 @@ export default function TripCard({
               {trip.title}
             </h3>
 
-            {/* Updated Location Display with Clickable City Links */}
+            {/* Updated Location Display */}
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-3 min-w-0">
               <MapPin className="w-4 h-4 text-blue-400 shrink-0" />
               <div className="min-w-0 flex-1">
                 <CitiesScroller
                   cities={cities}
                   className="text-sm"
-                  makeLinks={true}
+                  makeLinks={false}
                 />
               </div>
             </div>
@@ -427,4 +420,35 @@ export default function TripCard({
       />
     </>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  // Only re-render if these props actually changed
+  const shouldNotRerender = (
+    prevProps.trip.id === nextProps.trip.id &&
+    prevProps.trip.likes === nextProps.trip.likes &&
+    prevProps.trip.steals === nextProps.trip.steals &&
+    prevProps.trip.shares === nextProps.trip.shares &&
+    prevProps.isLoggedIn === nextProps.isLoggedIn &&
+    prevProps.currentUserId === nextProps.currentUserId &&
+    prevProps.isLoadingLikes === nextProps.isLoadingLikes &&
+    prevProps.userLikedTripIds === nextProps.userLikedTripIds
+  );
+
+  // Debug: Log when props change
+  if (!shouldNotRerender) {
+    console.log('[TripCard] Props changed for trip:', nextProps.trip.id, {
+      tripId: prevProps.trip.id !== nextProps.trip.id,
+      likes: prevProps.trip.likes !== nextProps.trip.likes,
+      steals: prevProps.trip.steals !== nextProps.trip.steals,
+      shares: prevProps.trip.shares !== nextProps.trip.shares,
+      isLoggedIn: prevProps.isLoggedIn !== nextProps.isLoggedIn,
+      currentUserId: prevProps.currentUserId !== nextProps.currentUserId,
+      isLoadingLikes: prevProps.isLoadingLikes !== nextProps.isLoadingLikes,
+      userLikedTripIds: prevProps.userLikedTripIds !== nextProps.userLikedTripIds,
+      onRestrictedAction: prevProps.onRestrictedAction !== nextProps.onRestrictedAction,
+      onFavoriteToggle: prevProps.onFavoriteToggle !== nextProps.onFavoriteToggle,
+    });
+  }
+
+  return shouldNotRerender;
+});

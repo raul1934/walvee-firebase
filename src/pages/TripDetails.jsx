@@ -70,7 +70,8 @@ export default function TripDetails({ user, openLoginModal }) {
 
   const queryClient = useQueryClient();
 
-  const urlParams = new URLSearchParams(window.location.search);
+  // Memoize URL params to prevent recreating on every render
+  const urlParams = React.useMemo(() => new URLSearchParams(window.location.search), []);
   const tripId = urlParams.get("id");
   const urlDay = urlParams.get("day");
   const urlPlaceId = urlParams.get("placeId");
@@ -549,8 +550,11 @@ export default function TripDetails({ user, openLoginModal }) {
     document.head.appendChild(script);
   }, []);
 
+  // Handle deep linking only once when tripData loads
+  const deepLinkHandled = useRef(false);
+
   useEffect(() => {
-    if (!tripData || !tripData.itinerary) return;
+    if (!tripData || !tripData.itinerary || deepLinkHandled.current) return;
 
     const hasDeepLinkParams = urlDay || urlPlaceId || urlGpid;
 
@@ -576,11 +580,13 @@ export default function TripDetails({ user, openLoginModal }) {
           }
         }, 300);
       }
+      deepLinkHandled.current = true;
     } else if (selectedDay === null || selectedDay === undefined) {
       setSelectedDay(0);
       setActiveTab("itinerary");
+      deepLinkHandled.current = true;
     }
-  }, [tripData, urlDay, urlPlaceId, urlGpid, selectedDay]);
+  }, [tripData, urlDay, urlPlaceId, urlGpid]);
 
   useEffect(() => {
     if (!tripData || activeTab !== "photos") return;
@@ -644,6 +650,7 @@ export default function TripDetails({ user, openLoginModal }) {
       setEnrichedDays(prev => {
         const currentSet = prev instanceof Set ? prev : new Set();
         const dayKey = `day-${selectedDay}`;
+        if (currentSet.has(dayKey)) return prev; // Don't create new set if already enriched
         return new Set([...currentSet, dayKey]);
       });
       return;
@@ -656,15 +663,19 @@ export default function TripDetails({ user, openLoginModal }) {
     const dayKey = `day-${selectedDay}`;
     const enrichedDaysSet = enrichedDays instanceof Set ? enrichedDays : new Set();
 
+    // Check if already enriched - don't re-run
     if (enrichedDaysSet.has(dayKey)) return;
 
     setLoadingDayPlaces(true);
     const service = new window.google.maps.places.PlacesService(document.createElement('div'));
 
+    const newEnrichedPlaces = {};
+
     Promise.all(currentDay.places.map((place, idx) => {
       return new Promise(resolve => {
         const placeKey = `${selectedDay}-${idx}`;
 
+        // Check if already enriched in current state
         if (enrichedPlaces[placeKey]) {
           resolve();
           return;
@@ -678,24 +689,26 @@ export default function TripDetails({ user, openLoginModal }) {
         service.textSearch(request, (results, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
             const result = results[0];
-            setEnrichedPlaces(prev => ({
-              ...prev,
-              [placeKey]: {
-                ...place,
-                rating: result.rating || place.rating,
-                reviews_count: result.user_ratings_total || place.reviews_count,
-                user_ratings_total: result.user_ratings_total || place.user_ratings_total,
-                photos: result.photos?.slice(0, 5).map(p => p.getUrl({ maxWidth: 800 })) || [],
-                geometry: result.geometry,
-                price_level: result.price_level !== undefined ? result.price_level : place.price_level,
-                place_id: result.place_id || place.place_id
-              }
-            }));
+            newEnrichedPlaces[placeKey] = {
+              ...place,
+              rating: result.rating || place.rating,
+              reviews_count: result.user_ratings_total || place.reviews_count,
+              user_ratings_total: result.user_ratings_total || place.user_ratings_total,
+              photos: result.photos?.slice(0, 5).map(p => p.getUrl({ maxWidth: 800 })) || [],
+              geometry: result.geometry,
+              price_level: result.price_level !== undefined ? result.price_level : place.price_level,
+              place_id: result.place_id || place.place_id
+            };
           }
           resolve();
         });
       });
     })).then(() => {
+      // Batch update all enriched places at once
+      if (Object.keys(newEnrichedPlaces).length > 0) {
+        setEnrichedPlaces(prev => ({ ...prev, ...newEnrichedPlaces }));
+      }
+
       setEnrichedDays(prev => {
         const currentSet = prev instanceof Set ? prev : new Set();
         return new Set([...currentSet, dayKey]);
@@ -706,7 +719,7 @@ export default function TripDetails({ user, openLoginModal }) {
       setLoadingDayPlaces(false);
     });
 
-  }, [tripData, selectedDay, enrichedPlaces, enrichedDays]);
+  }, [tripData, selectedDay]); // Remove enrichedPlaces and enrichedDays from dependencies
 
   useEffect(() => {
     const headerEl = headerRef.current;
@@ -1139,8 +1152,41 @@ export default function TripDetails({ user, openLoginModal }) {
     alert("Trip editor coming soon.");
   };
 
-  const cities = tripData ? getTripCities(tripData) : [];
-  const firstCity = cities[0] || 'Unknown';
+  // Memoize expensive calculations - MUST be before any conditional returns
+  const cities = React.useMemo(() => {
+    return tripData ? getTripCities(tripData) : [];
+  }, [tripData]);
+
+  const firstCity = React.useMemo(() => {
+    return cities[0] || 'Unknown';
+  }, [cities]);
+
+  const authorFirstName = React.useMemo(() => {
+    return tripData?.author_name?.split(' ')[0] || "Traveler";
+  }, [tripData?.author_name]);
+
+  const likesCount = tripData?.likes || 0;
+
+  const imagesForDisplay = React.useMemo(() => {
+    if (activeTab === "photos" && placePhotos.length > 0) {
+      return placePhotos.map(p => p.url);
+    }
+    return tripData?.images || [
+      tripData?.image_url || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&h=600&fit=crop"
+    ];
+  }, [activeTab, placePhotos, tripData?.images, tripData?.image_url]);
+
+  const tabs = React.useMemo(() => [
+    { id: "about", label: "About", Icon: Info },
+    { id: "itinerary", label: "Itinerary", Icon: Map },
+    { id: "steal", label: "Steal", Icon: Infinity },
+    { id: "photos", label: "Photos", Icon: Image },
+    { id: "comments", label: "Comments", Icon: MessageSquare },
+  ], []);
+
+  const currentDayPlaces = React.useMemo(() => {
+    return tripData?.itinerary?.[selectedDay]?.places || [];
+  }, [tripData?.itinerary, selectedDay]);
 
   if (isLoading || !tripData) {
     return (
@@ -1149,25 +1195,6 @@ export default function TripDetails({ user, openLoginModal }) {
       </div>
     );
   }
-
-  const authorFirstName = tripData.author_name?.split(' ')[0] || "Traveler";
-  const likesCount = tripData?.likes || 0;
-
-  const imagesForDisplay = activeTab === "photos" && placePhotos.length > 0
-    ? placePhotos.map(p => p.url)
-    : tripData.images || [
-        tripData.image_url || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&h=600&fit=crop"
-      ];
-
-  const tabs = [
-    { id: "about", label: "About", Icon: Info },
-    { id: "itinerary", label: "Itinerary", Icon: Map },
-    { id: "steal", label: "Steal", Icon: Infinity },
-    { id: "photos", label: "Photos", Icon: Image },
-    { id: "comments", label: "Comments", Icon: MessageSquare },
-  ];
-
-  const currentDayPlaces = tripData.itinerary?.[selectedDay]?.places || [];
 
   return (
     <div className="min-h-screen bg-[#0A0B0F] text-white overflow-x-hidden pt-16">

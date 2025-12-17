@@ -119,7 +119,6 @@ export default function CityLocals({ cityName }) {
               <UserAvatar
                 src={local.photo}
                 name={local.name}
-                userId={local.id}
                 size="lg"
               />
 
