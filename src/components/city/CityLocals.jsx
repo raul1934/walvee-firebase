@@ -116,11 +116,7 @@ export default function CityLocals({ cityName }) {
             className="bg-[#1A1B23] rounded-xl p-4 border border-[#2A2B35] hover:border-purple-500/50 transition-all group"
           >
             <div className="flex items-start gap-3">
-              <UserAvatar
-                src={local.photo}
-                name={local.name}
-                size="lg"
-              />
+              <UserAvatar src={local.photo} name={local.name} size="lg" />
 
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors truncate">

@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl, createProfileUrl } from "@/utils";
 export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
   const navigate = useNavigate();
-  
+
   const handleSignOut = async () => {
     try {
       onClose();

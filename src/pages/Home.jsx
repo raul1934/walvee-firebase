@@ -11,11 +11,11 @@ import TripCard from "../components/home/TripCard";
 import { useDragScroll } from "../components/hooks/useDragScroll";
 
 export default function Home({ user, userLoading, openLoginModal }) {
-  console.log('[Home] 🏠 Component rendered', {
+  console.log("[Home] 🏠 Component rendered", {
     hasUser: !!user,
     userEmail: user?.email,
     userLoading,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
@@ -27,22 +27,22 @@ export default function Home({ user, userLoading, openLoginModal }) {
 
   // Debug: Track hover state changes
   useEffect(() => {
-    console.log('[Home] ⚡ isHoveringCards changed to:', isHoveringCards);
+    console.log("[Home] ⚡ isHoveringCards changed to:", isHoveringCards);
   }, [isHoveringCards]);
 
   // Reset all trip cards to default state when component mounts
   useEffect(() => {
-    console.log('[Home] 🧹 Cleaning sessionStorage and cache');
+    console.log("[Home] 🧹 Cleaning sessionStorage and cache");
     // Clear all trip view preferences from sessionStorage
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('tripView_')) {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("tripView_")) {
         sessionStorage.removeItem(key);
       }
     });
 
     // Force clear React Query cache for trips
-    queryClient.removeQueries(['trips']);
-    console.log('[Home] 🗑️ Cleared trips query cache');
+    queryClient.removeQueries(["trips"]);
+    console.log("[Home] 🗑️ Cleared trips query cache");
   }, [queryClient]);
 
   useEffect(() => {
@@ -52,14 +52,19 @@ export default function Home({ user, userLoading, openLoginModal }) {
   }, [user, userLoading, navigate]);
 
   // Fetch trips and randomize order
-  console.log('[Home] 📊 Setting up useQuery for trips...');
-  const { data: trips = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['trips'],
+  console.log("[Home] 📊 Setting up useQuery for trips...");
+  const {
+    data: trips = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["trips"],
     queryFn: async () => {
-      console.log('[Home] ⬇️ Fetching trips...');
+      console.log("[Home] ⬇️ Fetching trips...");
       try {
         const allTrips = await Trip.list("-created_date");
-        console.log('[Home] ✅ Trips fetched:', allTrips.length);
+        console.log("[Home] ✅ Trips fetched:", allTrips.length);
 
         // Fisher-Yates shuffle algorithm to randomize order
         const shuffled = [...allTrips];
@@ -70,7 +75,7 @@ export default function Home({ user, userLoading, openLoginModal }) {
 
         return shuffled;
       } catch (err) {
-        console.error('[Home] ❌ Error fetching trips:', err);
+        console.error("[Home] ❌ Error fetching trips:", err);
         throw err;
       }
     },
@@ -79,30 +84,30 @@ export default function Home({ user, userLoading, openLoginModal }) {
     refetchOnWindowFocus: false,
     retry: 2,
     onError: (err) => {
-      console.error('[Home] ❌ React Query error:', err);
+      console.error("[Home] ❌ React Query error:", err);
     },
     onSuccess: (data) => {
-      console.log('[Home] ✅ React Query success:', data?.length, 'trips');
-    }
+      console.log("[Home] ✅ React Query success:", data?.length, "trips");
+    },
   });
 
-  console.log('[Home] 📈 Query state:', {
+  console.log("[Home] 📈 Query state:", {
     tripsCount: trips?.length,
     isLoading,
     hasError: !!error,
-    errorMessage: error?.message
+    errorMessage: error?.message,
   });
 
   // Fetch ALL user's likes in a SINGLE query to avoid rate limit
   const { data: userLikes = [], isLoading: isLoadingUserLikes } = useQuery({
-    queryKey: ['userLikes', user?.id],
+    queryKey: ["userLikes", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
       try {
         // Single query to get all likes by this user
         return await TripLike.filter({ liker_id: user.id });
       } catch (error) {
-        console.error('[Likes] Error fetching user likes:', error);
+        console.error("[Likes] Error fetching user likes:", error);
         return [];
       }
     },
@@ -116,13 +121,13 @@ export default function Home({ user, userLoading, openLoginModal }) {
 
   // Create a Set of liked trip IDs for fast lookup
   const userLikedTripIds = React.useMemo(() => {
-    return new Set(userLikes.map(like => like.trip_id));
+    return new Set(userLikes.map((like) => like.trip_id));
   }, [userLikes]);
 
   // Function to invalidate the user likes query, triggering a refetch - memoized
   const invalidateUserLikes = React.useCallback(() => {
     if (user?.id) {
-      queryClient.invalidateQueries(['userLikes', user.id]);
+      queryClient.invalidateQueries(["userLikes", user.id]);
     }
   }, [user?.id, queryClient]);
 
@@ -140,9 +145,9 @@ export default function Home({ user, userLoading, openLoginModal }) {
     checkScroll();
     const scrollElement = dragScrollRef.current || scrollRef.current;
     if (scrollElement) {
-      scrollElement.addEventListener('scroll', checkScroll);
-      window.addEventListener('resize', checkScroll);
-      
+      scrollElement.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+
       // Set initial scroll position to middle set for endless loop
       if (trips.length > 0 && scrollElement.scrollTop === 0) {
         const singleSetHeight = scrollElement.scrollHeight / 3;
@@ -152,9 +157,9 @@ export default function Home({ user, userLoading, openLoginModal }) {
 
     return () => {
       if (scrollElement) {
-        scrollElement.removeEventListener('scroll', checkScroll);
+        scrollElement.removeEventListener("scroll", checkScroll);
       }
-      window.removeEventListener('resize', checkScroll);
+      window.removeEventListener("resize", checkScroll);
     };
   }, [trips, dragScrollRef]);
 
@@ -165,17 +170,17 @@ export default function Home({ user, userLoading, openLoginModal }) {
     const autoScroll = setInterval(() => {
       if (scrollElement && !isHoveringCards) {
         const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-        
+
         // Calculate the height of one set of trips (original array)
         const singleSetHeight = scrollHeight / 3; // Since we're tripling the content
-        
+
         // Reset position when reaching the end of the second set to create endless loop
         if (scrollTop >= singleSetHeight * 2) {
           scrollElement.scrollTop = singleSetHeight;
         } else if (scrollTop <= 0) {
           scrollElement.scrollTop = singleSetHeight;
         } else {
-          scrollElement.scrollBy({ top: 2, behavior: 'auto' });
+          scrollElement.scrollBy({ top: 2, behavior: "auto" });
         }
       }
     }, 30);
@@ -188,7 +193,7 @@ export default function Home({ user, userLoading, openLoginModal }) {
     if (element) {
       element.scrollBy({
         top: 600,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   }, [dragScrollRef]);
@@ -209,31 +214,39 @@ export default function Home({ user, userLoading, openLoginModal }) {
           overflow: hidden;
         }
       `}</style>
-      
+
       <div className="h-full overflow-hidden">
         <div className="container mx-auto px-4 h-full">
           <div className="h-full flex flex-col lg:flex-row gap-8 py-8 overflow-hidden">
             <div
               className="relative lg:w-[420px] flex-shrink-0 h-full overflow-hidden"
               onMouseEnter={() => {
-                console.log('[Home] 🖱️ Mouse ENTER - setting isHoveringCards to true');
+                console.log(
+                  "[Home] 🖱️ Mouse ENTER - setting isHoveringCards to true"
+                );
                 setIsHoveringCards(true);
               }}
               onMouseLeave={() => {
-                console.log('[Home] 🖱️ Mouse LEAVE - setting isHoveringCards to false');
+                console.log(
+                  "[Home] 🖱️ Mouse LEAVE - setting isHoveringCards to false"
+                );
                 setIsHoveringCards(false);
-              }}>
-
+              }}
+            >
               <div
                 ref={(el) => {
                   scrollRef.current = el;
-                  if (dragScrollRef && typeof dragScrollRef === 'object' && 'current' in dragScrollRef) {
+                  if (
+                    dragScrollRef &&
+                    typeof dragScrollRef === "object" &&
+                    "current" in dragScrollRef
+                  ) {
                     dragScrollRef.current = el;
                   }
                 }}
                 className="h-full overflow-y-auto scrollbar-hide pr-2"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
                 <div className="space-y-6 pb-20">
                   {error && (
                     <div className="text-red-500 p-4 bg-red-50 rounded-lg">
@@ -262,7 +275,9 @@ export default function Home({ user, userLoading, openLoginModal }) {
                   ) : (
                     <div className="text-center py-12 text-gray-400">
                       <p>Nenhuma viagem criada ainda.</p>
-                      <p className="text-sm mt-2">Seja o primeiro a compartilhar sua aventura!</p>
+                      <p className="text-sm mt-2">
+                        Seja o primeiro a compartilhar sua aventura!
+                      </p>
                     </div>
                   )}
                 </div>
@@ -274,7 +289,9 @@ export default function Home({ user, userLoading, openLoginModal }) {
                 <HeroSection user={user} openLoginModal={openLoginModal} />
 
                 <div className="pt-[103px]">
-                  <h2 className="text-base md:text-lg text-center mb-3 text-gray-300">Or get inspired by other travelers around the world:</h2>
+                  <h2 className="text-base md:text-lg text-center mb-3 text-gray-300">
+                    Or get inspired by other travelers around the world:
+                  </h2>
 
                   <DestinationCarousel />
                   <TravelerCarousel />
