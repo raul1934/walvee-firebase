@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Map, Heart, Users, Sparkles, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import CitySearch from "./CitySearch";
 import PlaceCategoryFilter from "./PlaceCategoryFilter";
+import { requireAuth, createPageUrl } from "@/utils";
 
 const tabs = [
 { id: "all", label: "All Trips", icon: Map },
@@ -13,7 +15,14 @@ const tabs = [
 { id: "favorites", label: "Favorites", icon: Heart }];
 
 
-export default function CityNavigation({ activeTab, onTabChange, cityName, onCreateTrip, placeCategory, onCategoryChange }) {
+export default function CityNavigation({ activeTab, onTabChange, cityName, user, openLoginModal, placeCategory, onCategoryChange }) {
+  const navigate = useNavigate();
+  
+  const handleCreateTrip = () => {
+    requireAuth(user, openLoginModal, () => {
+      navigate(createPageUrl("InspirePrompt"));
+    });
+  };
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
@@ -118,7 +127,7 @@ export default function CityNavigation({ activeTab, onTabChange, cityName, onCre
             {/* CTA à direita dos filtros */}
             {isSticky && (
               <Button
-                onClick={onCreateTrip}
+                onClick={handleCreateTrip}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white px-6 py-2.5 text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:scale-105 flex-shrink-0"
               >
                 Create trip in {city}

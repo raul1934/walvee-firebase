@@ -1,9 +1,18 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { requireAuth, createPageUrl } from "@/utils";
 
-export default function CityHeader({ cityName, onCreateTrip }) {
+export default function CityHeader({ cityName, user, openLoginModal }) {
+  const navigate = useNavigate();
+  
+  const handleCreateTrip = () => {
+    requireAuth(user, openLoginModal, () => {
+      navigate(createPageUrl("InspirePrompt"));
+    });
+  };
   return (
     <div className="relative overflow-hidden min-h-[280px] flex items-center justify-center">
       {/* Gradient Background */}
@@ -64,7 +73,7 @@ export default function CityHeader({ cityName, onCreateTrip }) {
             className="pt-2"
           >
             <Button
-              onClick={onCreateTrip}
+              onClick={handleCreateTrip}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white px-10 py-6 text-base font-bold rounded-2xl shadow-2xl shadow-blue-500/30 transition-all hover:scale-105 hover:shadow-blue-500/40"
             >
               Create a trip in {cityName}

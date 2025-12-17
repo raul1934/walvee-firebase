@@ -1,15 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { requireAuth, createPageUrl } from "@/utils";
 
 export default function HeroSection({ user, openLoginModal }) {
+  const navigate = useNavigate();
+  
   const handleCreateTrip = () => {
-    if (!user && openLoginModal) {
-      openLoginModal();
-    } else {
-
-      // Navigate to create trip page when logged in
-    }};
+    requireAuth(user, openLoginModal, () => {
+      navigate(createPageUrl("InspirePrompt"));
+    });
+  };
 
   const userName = user?.preferred_name || user?.full_name?.split(' ')[0] || "traveler";
 

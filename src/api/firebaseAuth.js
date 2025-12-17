@@ -1,10 +1,10 @@
 import {
   signInWithPopup,
   signOut as firebaseSignOut,
-  onAuthStateChanged
-} from 'firebase/auth';
-import { auth, googleProvider, db } from '@/config/firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+  onAuthStateChanged,
+} from "firebase/auth";
+import { auth, googleProvider, db } from "@/config/firebase";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export const firebaseAuthService = {
   // Check if user is authenticated
@@ -28,29 +28,29 @@ export const firebaseAuthService = {
     if (!user) return null;
 
     // Fetch user document from Firestore
-    const userDocRef = doc(db, 'users', user.uid);
+    const userDocRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
       return {
         id: user.uid,
         email: user.email,
-        ...userDoc.data()
+        ...userDoc.data(),
       };
     }
 
     // If no document exists, create one with basic info
     const userData = {
       email: user.email,
-      full_name: user.displayName || '',
-      preferred_name: user.displayName?.split(' ')[0] || '',
-      photo_url: user.photoURL || '',
+      full_name: user.displayName || "",
+      preferred_name: user.displayName?.split(" ")[0] || "",
+      photo_url: user.photoURL || "",
       created_at: serverTimestamp(),
       onboarding_completed: false,
       metrics_followers: 0,
       metrics_following: 0,
       metrics_trips: 0,
-      metrics_likes_received: 0
+      metrics_likes_received: 0,
     };
 
     await setDoc(userDocRef, userData);
@@ -58,21 +58,25 @@ export const firebaseAuthService = {
     return {
       id: user.uid,
       email: user.email,
-      ...userData
+      ...userData,
     };
   },
 
   // Update current user profile (matches Base44 updateMe() API)
   updateMe: async (data) => {
     const user = auth.currentUser;
-    if (!user) throw new Error('Not authenticated');
+    if (!user) throw new Error("Not authenticated");
 
-    const userDocRef = doc(db, 'users', user.uid);
+    const userDocRef = doc(db, "users", user.uid);
 
-    await setDoc(userDocRef, {
-      ...data,
-      updated_at: serverTimestamp()
-    }, { merge: true });
+    await setDoc(
+      userDocRef,
+      {
+        ...data,
+        updated_at: serverTimestamp(),
+      },
+      { merge: true }
+    );
 
     return await firebaseAuthService.me();
   },
@@ -83,36 +87,43 @@ export const firebaseAuthService = {
       const result = await signInWithPopup(auth, googleProvider);
 
       // Create or update user document
-      const userRef = doc(db, 'users', result.user.uid);
+      const userRef = doc(db, "users", result.user.uid);
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
         await setDoc(userRef, {
           email: result.user.email,
-          full_name: result.user.displayName || '',
-          preferred_name: result.user.displayName?.split(' ')[0] || '',
-          photo_url: result.user.photoURL || '',
+          full_name: result.user.displayName || "",
+          preferred_name: result.user.displayName?.split(" ")[0] || "",
+          photo_url: result.user.photoURL || "",
           created_at: serverTimestamp(),
           onboarding_completed: false,
           metrics_followers: 0,
           metrics_following: 0,
           metrics_trips: 0,
-          metrics_likes_received: 0
+          metrics_likes_received: 0,
         });
       } else {
         // Update photo if it changed
         const currentData = userDoc.data();
-        if (result.user.photoURL && result.user.photoURL !== currentData.photo_url) {
-          await setDoc(userRef, {
-            photo_url: result.user.photoURL,
-            updated_at: serverTimestamp()
-          }, { merge: true });
+        if (
+          result.user.photoURL &&
+          result.user.photoURL !== currentData.photo_url
+        ) {
+          await setDoc(
+            userRef,
+            {
+              photo_url: result.user.photoURL,
+              updated_at: serverTimestamp(),
+            },
+            { merge: true }
+          );
         }
       }
 
       return result.user;
     } catch (error) {
-      console.error('Google sign-in error:', error);
+      console.error("Google sign-in error:", error);
       throw error;
     }
   },
@@ -122,7 +133,7 @@ export const firebaseAuthService = {
     try {
       await firebaseSignOut(auth);
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
       throw error;
     }
   },
@@ -134,7 +145,7 @@ export const firebaseAuthService = {
 
   // Compatibility method - redirect to login (not needed for popup, but kept for compatibility)
   redirectToLogin: (returnTo) => {
-    console.warn('redirectToLogin called but using popup instead');
+    console.warn("redirectToLogin called but using popup instead");
     return firebaseAuthService.signInWithGoogle();
-  }
+  },
 };

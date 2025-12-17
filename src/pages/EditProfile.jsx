@@ -15,19 +15,19 @@ const MAX_BIO_LENGTH = 200;
 export default function EditProfile({ user, userLoading }) {
   const autocompleteService = useRef(null);
   const fileInputRef = useRef(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [locationSuggestions, setLocationSuggestions] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     full_name: "",
     preferred_name: "",
     bio: "",
     city: "",
     country: "",
-    photo_url: ""
+    photo_url: "",
   });
 
   useEffect(() => {
@@ -44,9 +44,9 @@ export default function EditProfile({ user, userLoading }) {
         bio: user.bio || "",
         city: user.city || "",
         country: user.country || "",
-        photo_url: user.photo_url || user.picture || ""
+        photo_url: user.photo_url || user.picture || "",
       });
-      
+
       if (user.city && user.country) {
         setLocationQuery(`${user.city}, ${user.country}`);
       }
@@ -56,7 +56,7 @@ export default function EditProfile({ user, userLoading }) {
   useEffect(() => {
     if (window.google) return;
 
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
     script.async = true;
     script.defer = true;
@@ -71,13 +71,14 @@ export default function EditProfile({ user, userLoading }) {
 
   useEffect(() => {
     if (window.google?.maps?.places && !autocompleteService.current) {
-      autocompleteService.current = new window.google.maps.places.AutocompleteService();
+      autocompleteService.current =
+        new window.google.maps.places.AutocompleteService();
     }
   }, []);
 
   const handleLocationSearch = (query) => {
     setLocationQuery(query);
-    
+
     if (!query || !autocompleteService.current) {
       setLocationSuggestions([]);
       return;
@@ -86,10 +87,13 @@ export default function EditProfile({ user, userLoading }) {
     autocompleteService.current.getPlacePredictions(
       {
         input: query,
-        types: ['(cities)']
+        types: ["(cities)"],
       },
       (predictions, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+        if (
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          predictions
+        ) {
           setLocationSuggestions(predictions);
         } else {
           setLocationSuggestions([]);
@@ -102,8 +106,8 @@ export default function EditProfile({ user, userLoading }) {
     const terms = prediction.terms;
     const city = terms.length > 0 ? terms[0].value : "";
     const country = terms.length > 1 ? terms[terms.length - 1].value : "";
-    
-    setFormData(prev => ({ ...prev, city, country }));
+
+    setFormData((prev) => ({ ...prev, city, country }));
     setLocationQuery(prediction.description);
     setLocationSuggestions([]);
   };
@@ -112,23 +116,23 @@ export default function EditProfile({ user, userLoading }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
+      alert("Image size must be less than 5MB");
       return;
     }
 
     setUploadingPhoto(true);
     try {
       const { file_url } = await uploadImage(file);
-      setFormData(prev => ({ ...prev, photo_url: file_url }));
+      setFormData((prev) => ({ ...prev, photo_url: file_url }));
     } catch (error) {
-      console.error('Error uploading photo:', error);
-      alert('Failed to upload photo. Please try again.');
+      console.error("Error uploading photo:", error);
+      alert("Failed to upload photo. Please try again.");
     } finally {
       setUploadingPhoto(false);
     }
@@ -136,9 +140,9 @@ export default function EditProfile({ user, userLoading }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.preferred_name.trim()) {
-      alert('Please enter your preferred name');
+      alert("Please enter your preferred name");
       return;
     }
 
@@ -149,7 +153,7 @@ export default function EditProfile({ user, userLoading }) {
         preferred_name: formData.preferred_name.trim(),
         bio: formData.bio.trim(),
         city: formData.city.trim(),
-        country: formData.country.trim()
+        country: formData.country.trim(),
       };
 
       if (formData.photo_url) {
@@ -160,8 +164,8 @@ export default function EditProfile({ user, userLoading }) {
       await User.updateMe(updateData);
       window.location.href = createPageUrl("Profile");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -182,7 +186,7 @@ export default function EditProfile({ user, userLoading }) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.location.href = createPageUrl("Profile")}
+            onClick={() => (window.location.href = createPageUrl("Profile"))}
             className="text-gray-400 hover:text-white"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -192,8 +196,10 @@ export default function EditProfile({ user, userLoading }) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-[#1A1B23] rounded-2xl p-6 border border-[#2A2B35]">
-            <h2 className="text-lg font-semibold text-white mb-4">Profile Photo</h2>
-            
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Profile Photo
+            </h2>
+
             <div className="flex items-center gap-6">
               <div className="relative">
                 <UserAvatar
@@ -203,7 +209,7 @@ export default function EditProfile({ user, userLoading }) {
                   ring={true}
                   className="ring-4 ring-blue-500/30"
                 />
-                
+
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -216,7 +222,7 @@ export default function EditProfile({ user, userLoading }) {
                     <Camera className="w-4 h-4 text-white" />
                   )}
                 </button>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -225,7 +231,7 @@ export default function EditProfile({ user, userLoading }) {
                   className="hidden"
                 />
               </div>
-              
+
               <div className="flex-1">
                 <p className="text-sm text-gray-400 mb-2">
                   Upload a new profile photo
@@ -238,8 +244,10 @@ export default function EditProfile({ user, userLoading }) {
           </div>
 
           <div className="bg-[#1A1B23] rounded-2xl p-6 border border-[#2A2B35] space-y-4">
-            <h2 className="text-lg font-semibold text-white mb-4">Personal Information</h2>
-            
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Personal Information
+            </h2>
+
             <div>
               <Label htmlFor="full_name" className="text-gray-300 mb-2 block">
                 Full Name
@@ -247,20 +255,27 @@ export default function EditProfile({ user, userLoading }) {
               <Input
                 id="full_name"
                 value={formData.full_name}
-                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, full_name: e.target.value })
+                }
                 placeholder="John Doe"
                 className="bg-[#0D0D0D] border-gray-700 text-white h-12"
               />
             </div>
 
             <div>
-              <Label htmlFor="preferred_name" className="text-gray-300 mb-2 block">
+              <Label
+                htmlFor="preferred_name"
+                className="text-gray-300 mb-2 block"
+              >
                 Preferred Name <span className="text-red-400">*</span>
               </Label>
               <Input
                 id="preferred_name"
                 value={formData.preferred_name}
-                onChange={(e) => setFormData({...formData, preferred_name: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, preferred_name: e.target.value })
+                }
                 placeholder="How would you like to be called?"
                 className="bg-[#0D0D0D] border-gray-700 text-white h-12"
                 required
@@ -273,7 +288,7 @@ export default function EditProfile({ user, userLoading }) {
 
           <div className="bg-[#1A1B23] rounded-2xl p-6 border border-[#2A2B35]">
             <h2 className="text-lg font-semibold text-white mb-4">About You</h2>
-            
+
             <div>
               <Label htmlFor="bio" className="text-gray-300 mb-2 block">
                 Bio
@@ -283,7 +298,7 @@ export default function EditProfile({ user, userLoading }) {
                 value={formData.bio}
                 onChange={(e) => {
                   if (e.target.value.length <= MAX_BIO_LENGTH) {
-                    setFormData({...formData, bio: e.target.value});
+                    setFormData({ ...formData, bio: e.target.value });
                   }
                 }}
                 placeholder="Tell other travelers about yourself..."
@@ -301,11 +316,9 @@ export default function EditProfile({ user, userLoading }) {
               <MapPin className="w-5 h-5 text-blue-500" />
               Your Location
             </h2>
-            
+
             <div className="relative">
-              <Label className="text-gray-300 mb-2 block">
-                City & Country
-              </Label>
+              <Label className="text-gray-300 mb-2 block">City & Country</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
                 <Input
@@ -327,7 +340,9 @@ export default function EditProfile({ user, userLoading }) {
                     >
                       <div className="flex items-center gap-3">
                         <MapPin className="w-4 h-4 text-blue-400 shrink-0" />
-                        <span className="text-white text-sm">{prediction.description}</span>
+                        <span className="text-white text-sm">
+                          {prediction.description}
+                        </span>
                       </div>
                     </button>
                   ))}
@@ -339,7 +354,7 @@ export default function EditProfile({ user, userLoading }) {
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
-              onClick={() => window.location.href = createPageUrl("Profile")}
+              onClick={() => (window.location.href = createPageUrl("Profile"))}
               variant="outline"
               className="flex-1 h-12 border-gray-700 text-gray-300 hover:bg-gray-800"
             >

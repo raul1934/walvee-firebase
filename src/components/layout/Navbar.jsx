@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { User } from "@/api/entities";
 import { Link } from "react-router-dom";
@@ -23,12 +22,12 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
     isLoading,
     error,
     clearSearch,
-    retrySearch
+    retrySearch,
   } = useGlobalSearch();
 
   // Fetch live KPIs from user entity - with silent error handling
   const { data: liveUser } = useQuery({
-    queryKey: ['userKPIs', user?.id],
+    queryKey: ["userKPIs", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       try {
@@ -47,7 +46,7 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
     refetchOnWindowFocus: false,
     onError: () => {
       // Silent - don't show error to user
-    }
+    },
   });
 
   const myTrips = liveUser?.metrics_my_trips || 0;
@@ -78,7 +77,6 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
       <header className="fixed top-0 left-0 right-0 z-[60] bg-[#0D0D0D] border-b border-[#1F1F1F]">
         <nav className="relative h-16 px-5">
           <div className="h-full grid grid-cols-[auto_1fr_auto] items-center gap-4">
-            
             {/* LEFT - Hamburger + Logo */}
             <div className="flex items-center gap-2">
               <button
@@ -88,15 +86,15 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
               >
                 <Menu className="w-[22px] h-[22px] text-white" />
               </button>
-              
+
               <Link to={createPageUrl("Home")} className="flex items-center">
                 {!logoError ? (
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/a0788d9a8_Marca.png" 
-                    alt="Walvee" 
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/a0788d9a8_Marca.png"
+                    alt="Walvee"
                     className="h-8 w-auto"
                     onError={() => setLogoError(true)}
-                    style={{ maxWidth: '120px' }}
+                    style={{ maxWidth: "120px" }}
                   />
                 ) : (
                   <span className="text-2xl font-bold bg-gradient-to-r from-[#1E66FF] to-[#8B5CF6] bg-clip-text text-transparent">
@@ -125,28 +123,46 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                 <>
                   {/* KPIs - hidden on mobile - ALL USING EMAIL */}
                   <div className="hidden md:flex items-center gap-4 mr-2">
-                    <Link 
-                      to={`${createPageUrl("Profile")}?email=${encodeURIComponent(user.email)}`}
+                    <Link
+                      to={`${createPageUrl(
+                        "Profile"
+                      )}?email=${encodeURIComponent(user.email)}`}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
-                      <div className="text-lg font-bold text-white">{myTrips}</div>
-                      <div className="text-[10px] text-gray-400 -mt-1">My Trips</div>
+                      <div className="text-lg font-bold text-white">
+                        {myTrips}
+                      </div>
+                      <div className="text-[10px] text-gray-400 -mt-1">
+                        My Trips
+                      </div>
                     </Link>
-                    
-                    <Link 
-                      to={`${createPageUrl("Profile")}?email=${encodeURIComponent(user.email)}`}
+
+                    <Link
+                      to={`${createPageUrl(
+                        "Profile"
+                      )}?email=${encodeURIComponent(user.email)}`}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
-                      <div className="text-lg font-bold text-white">{followers}</div>
-                      <div className="text-[10px] text-gray-400 -mt-1">Followers</div>
+                      <div className="text-lg font-bold text-white">
+                        {followers}
+                      </div>
+                      <div className="text-[10px] text-gray-400 -mt-1">
+                        Followers
+                      </div>
                     </Link>
-                    
-                    <Link 
-                      to={`${createPageUrl("Profile")}?email=${encodeURIComponent(user.email)}`}
+
+                    <Link
+                      to={`${createPageUrl(
+                        "Profile"
+                      )}?email=${encodeURIComponent(user.email)}`}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
-                      <div className="text-lg font-bold text-white">{following}</div>
-                      <div className="text-[10px] text-gray-400 -mt-1">Following</div>
+                      <div className="text-lg font-bold text-white">
+                        {following}
+                      </div>
+                      <div className="text-[10px] text-gray-400 -mt-1">
+                        Following
+                      </div>
                     </Link>
                   </div>
 
@@ -155,16 +171,14 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                     <Bell className="w-5 h-5 text-white" />
                   </button>
 
-                  {/* User Avatar - USING EMAIL */}
-                  <Link to={`${createPageUrl("Profile")}?email=${encodeURIComponent(user.email)}`}>
-                    <UserAvatar
-                      src={user.photo_url || user.picture}
-                      name={user.preferred_name || user.full_name || user.email}
-                      size="md"
-                      ring={true}
-                      email={user.email}
-                    />
-                  </Link>
+                  {/* User Avatar - handles its own link internally */}
+                  <UserAvatar
+                    src={user.photo_url || user.picture}
+                    name={user.preferred_name || user.full_name || user.email}
+                    size="md"
+                    ring={true}
+                    email={user.email}
+                  />
                 </>
               ) : (
                 <button

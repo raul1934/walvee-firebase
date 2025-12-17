@@ -1,21 +1,24 @@
-
 import React from "react";
 import { User } from "@/api/entities";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
-  const handleSignOut = () => {
-    onClose();
-    const homeUrl = window.location.origin + createPageUrl("Home");
-    User.logout(homeUrl);
+  const handleSignOut = async () => {
+    try {
+      onClose();
+      await User.signOut();
+      navigate(createPageUrl("Home"));
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
     <>
       {/* Overlay */}
-      <div 
+      <div
         className={`fixed top-16 left-0 right-0 bottom-0 bg-black/35 z-[65] transition-opacity duration-250 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
@@ -23,7 +26,7 @@ export default function Sidebar({ isOpen, onClose, user, openLoginModal }) {
       {/* Drawer */}
       <aside
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-[300px] lg:w-[340px] xl:w-[386px] bg-[#0D0D0D] z-[70] transform transition-transform duration-250 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full p-5 overflow-y-auto">

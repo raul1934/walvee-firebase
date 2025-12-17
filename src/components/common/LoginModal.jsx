@@ -28,19 +28,19 @@ export default function LoginModal({ isOpen, onClose }) {
     if (!isOpen) return;
 
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && !loading) onClose();
+      if (e.key === "Escape" && !loading) onClose();
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, loading, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity duration-300 ${
-        loading ? 'opacity-90' : 'opacity-100'
+        loading ? "opacity-90" : "opacity-100"
       }`}
       role="dialog"
       aria-modal="true"
@@ -48,22 +48,23 @@ export default function LoginModal({ isOpen, onClose }) {
       aria-describedby="login-modal-description"
     >
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/bc6c44404_photo-1517400508447-f8dd518b86db.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          filter: 'blur(2px)'
+          backgroundImage:
+            "url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/bc6c44404_photo-1517400508447-f8dd518b86db.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          filter: "blur(2px)",
         }}
       />
-      <div 
-        className="absolute inset-0 bg-black/75 z-0" 
+      <div
+        className="absolute inset-0 bg-black/75 z-0"
         onClick={!loading ? onClose : undefined}
         aria-label="Close modal"
       />
-      
+
       {/* Content */}
       <div className="relative z-10 w-full max-w-md">
         {!loading && (
@@ -82,13 +83,16 @@ export default function LoginModal({ isOpen, onClose }) {
               {/* Logo */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 p-4 shadow-lg shadow-blue-500/30">
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/e98bb66bb_LogoWalvee.png" 
-                    alt="Walvee" 
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/e98bb66bb_LogoWalvee.png"
+                    alt="Walvee"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <h1 id="login-modal-title" className="text-2xl font-bold mb-2 text-white">
+                <h1
+                  id="login-modal-title"
+                  className="text-2xl font-bold mb-2 text-white"
+                >
                   Welcome to Walvee
                 </h1>
                 <p className="text-blue-400 text-sm font-medium">
@@ -98,8 +102,20 @@ export default function LoginModal({ isOpen, onClose }) {
 
               {/* Main Message */}
               <div className="mb-8 text-center px-2">
-                <p id="login-modal-description" className="text-gray-300 text-[15px] leading-relaxed">
-                  After logging in, Walvee will guide you to plan, explore, and create unforgettable trips — <span className="text-blue-400 font-medium">powered by AI</span>, <span className="text-purple-400 font-medium">inspired by real travelers</span>.
+                <p
+                  id="login-modal-description"
+                  className="text-gray-300 text-[15px] leading-relaxed"
+                >
+                  After logging in, Walvee will guide you to plan, explore, and
+                  create unforgettable trips —{" "}
+                  <span className="text-blue-400 font-medium">
+                    powered by AI
+                  </span>
+                  ,{" "}
+                  <span className="text-purple-400 font-medium">
+                    inspired by real travelers
+                  </span>
+                  .
                 </p>
               </div>
 
@@ -115,21 +131,21 @@ export default function LoginModal({ isOpen, onClose }) {
                     <span>Connecting...</span>
                   </>
                 ) : (
-                  'Proceed to login'
+                  "Proceed to login"
                 )}
               </Button>
 
               {/* Terms Footer */}
               <p className="text-center text-xs text-gray-500 mt-6 leading-relaxed">
                 By signing in, you agree to our{" "}
-                <button 
+                <button
                   className="text-blue-400 hover:text-blue-300 underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#111827] rounded"
                   onClick={(e) => e.preventDefault()}
                 >
                   Terms of Service
-                </button>
-                {" "}and{" "}
-                <button 
+                </button>{" "}
+                and{" "}
+                <button
                   className="text-blue-400 hover:text-blue-300 underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#111827] rounded"
                   onClick={(e) => e.preventDefault()}
                 >
@@ -142,11 +158,23 @@ export default function LoginModal({ isOpen, onClose }) {
               {/* Error State */}
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <svg
+                    className="w-8 h-8 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
                   </svg>
                 </div>
-                <h2 className="text-xl font-bold mb-2 text-white">Something went wrong</h2>
+                <h2 className="text-xl font-bold mb-2 text-white">
+                  Something went wrong
+                </h2>
                 <p className="text-gray-400 text-sm">
                   We couldn't connect to the login service. Please try again.
                 </p>

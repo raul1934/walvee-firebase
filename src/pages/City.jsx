@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Trip } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, requireAuth } from "@/utils";
 import { MapPin } from "lucide-react";
 import CityHeader from "../components/city/CityHeader";
 import CityNavigation from "../components/city/CityNavigation";
@@ -601,11 +601,9 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
   }, [trips]);
 
   const handleCreateTrip = () => {
-    if (!user && openLoginModal) {
-      openLoginModal();
-    } else {
-      alert(`Create trip feature coming soon for ${cityName}!`);
-    }
+    requireAuth(user, openLoginModal, () => {
+      navigate(createPageUrl("InspirePrompt"));
+    });
   };
 
   const handlePlaceClick = (place) => {
@@ -661,14 +659,16 @@ export default function City({ user, openLoginModal, cityNameOverride, isModal =
 
       <CityHeader
         cityName={cityName}
-        onCreateTrip={handleCreateTrip}
+        user={user}
+        openLoginModal={openLoginModal}
       />
 
       <CityNavigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
         cityName={cityName}
-        onCreateTrip={handleCreateTrip}
+        user={user}
+        openLoginModal={openLoginModal}
         placeCategory={placeCategory}
         onCategoryChange={setPlaceCategory}
       />
