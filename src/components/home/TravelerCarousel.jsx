@@ -21,54 +21,56 @@ export default function TravelerCarousel() {
   const [randomSeed] = React.useState(() => Math.random());
 
   const { data: travelers = [], isLoading } = useQuery({
-    queryKey: ['homeTravelers', randomSeed],
+    queryKey: ["homeTravelers", randomSeed],
     queryFn: async () => {
       try {
         // Create cache key with domain to avoid cross-domain cache issues
         const domain = window.location.hostname;
         const cacheKey = `walvee_travelers_cache_${domain}`;
-        
+
         // First try to get users from cache
         const cachedUsers = sessionStorage.getItem(cacheKey);
         if (cachedUsers) {
           const cache = JSON.parse(cachedUsers);
           if (Date.now() - cache.timestamp < 10 * 60 * 1000) {
-            console.log('[TravelerCarousel] Using cached travelers');
+            console.log("[TravelerCarousel] Using cached travelers");
             return shuffleArray(cache.data);
           }
         }
 
-        console.log('[TravelerCarousel] Fetching travelers...');
-        
+        console.log("[TravelerCarousel] Fetching travelers...");
+
         let travelers = [];
-        
+
         // Try to get users from User entity first (if authenticated)
         try {
           const isAuthenticated = await User.isAuthenticated();
           if (isAuthenticated) {
-            console.log('[TravelerCarousel] User authenticated, trying User.list()');
+            console.log(
+              "[TravelerCarousel] User authenticated, trying User.list()"
+            );
             const allUsers = await User.list();
-            
+
             travelers = allUsers
-              .filter(user => {
+              .filter((user) => {
                 if (!user.email) return false;
-                
+
                 const email = user.email.toLowerCase();
-                const isFakeEmail = 
-                  email.includes('test@') || 
-                  email.includes('fake@') || 
-                  email.includes('@example.') ||
-                  email.startsWith('test') ||
-                  email.startsWith('fake');
-                
+                const isFakeEmail =
+                  email.includes("test@") ||
+                  email.includes("fake@") ||
+                  email.includes("@example.") ||
+                  email.startsWith("test") ||
+                  email.startsWith("fake");
+
                 if (isFakeEmail) return false;
-                
+
                 const hasName = !!(user.preferred_name || user.full_name);
                 if (!hasName) return false;
-                
+
                 return true;
               })
-              .map(user => ({
+              .map((user) => ({
                 id: user.id,
                 email: user.email,
                 full_name: user.full_name,
@@ -79,62 +81,77 @@ export default function TravelerCarousel() {
                 metrics_followers: user.metrics_followers || 0,
                 metrics_following: user.metrics_following || 0,
                 created_date: user.created_date,
-                score: (user.metrics_my_trips || 0) * 10 + 
-                       (user.metrics_followers || 0) * 5 + 
-                       (user.metrics_following || 0) * 2 +
-                       (user.photo_url || user.picture ? 5 : 0)
+                score:
+                  (user.metrics_my_trips || 0) * 10 +
+                  (user.metrics_followers || 0) * 5 +
+                  (user.metrics_following || 0) * 2 +
+                  (user.photo_url || user.picture ? 5 : 0),
               }))
               .sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
+                return (
+                  new Date(b.created_date || 0).getTime() -
+                  new Date(a.created_date || 0).getTime()
+                );
               })
               .slice(0, 15);
-            
-            console.log('[TravelerCarousel] Got', travelers.length, 'travelers from User entity');
+
+            console.log(
+              "[TravelerCarousel] Got",
+              travelers.length,
+              "travelers from User entity"
+            );
           }
         } catch (error) {
-          console.warn('[TravelerCarousel] Could not fetch from User entity:', error.message);
+          console.warn(
+            "[TravelerCarousel] Could not fetch from User entity:",
+            error.message
+          );
         }
-        
+
         // If we couldn't get users from User entity, build from trips
         if (travelers.length === 0) {
-          console.log('[TravelerCarousel] Building travelers from trips (public data)');
-          
+          console.log(
+            "[TravelerCarousel] Building travelers from trips (public data)"
+          );
+
           const allTrips = await Trip.list();
           const userMap = new Map();
-          
-          allTrips.forEach(trip => {
+
+          allTrips.forEach((trip) => {
             const email = trip.created_by;
             if (!email) return;
-            
+
             // Skip fake/test emails
             const emailLower = email.toLowerCase();
-            if (emailLower.includes('test@') || 
-                emailLower.includes('fake@') || 
-                emailLower.includes('@example.') ||
-                emailLower.startsWith('test') ||
-                emailLower.startsWith('fake')) {
+            if (
+              emailLower.includes("test@") ||
+              emailLower.includes("fake@") ||
+              emailLower.includes("@example.") ||
+              emailLower.startsWith("test") ||
+              emailLower.startsWith("fake")
+            ) {
               return;
             }
-            
+
             const name = trip.author_name;
             const photo = trip.author_photo;
-            
+
             if (!name) return;
-            
+
             if (!userMap.has(email)) {
               userMap.set(email, {
                 id: email,
                 email: email,
                 full_name: name,
-                preferred_name: name.split(' ')[0],
+                preferred_name: name.split(" ")[0],
                 photo_url: photo,
                 picture: photo,
                 metrics_my_trips: 1,
                 metrics_followers: 0,
                 metrics_following: 0,
                 created_date: trip.created_date,
-                score: 10
+                score: 10,
               });
             } else {
               const user = userMap.get(email);
@@ -142,38 +159,48 @@ export default function TravelerCarousel() {
               user.score += 10;
             }
           });
-          
+
           travelers = Array.from(userMap.values())
             .sort((a, b) => {
               if (b.score !== a.score) return b.score - a.score;
-              return new Date(b.created_date || 0).getTime() - new Date(a.created_date || 0).getTime();
+              return (
+                new Date(b.created_date || 0).getTime() -
+                new Date(a.created_date || 0).getTime()
+              );
             })
             .slice(0, 15);
-          
-          console.log('[TravelerCarousel] Built', travelers.length, 'travelers from trips');
+
+          console.log(
+            "[TravelerCarousel] Built",
+            travelers.length,
+            "travelers from trips"
+          );
         }
-        
+
         // Cache the results with domain-specific key
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          data: travelers,
-          timestamp: Date.now()
-        }));
-        
+        sessionStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            data: travelers,
+            timestamp: Date.now(),
+          })
+        );
+
         // Randomize order on each load
         return shuffleArray(travelers);
       } catch (error) {
-        console.error('[TravelerCarousel] Error loading travelers:', error);
-        
+        console.error("[TravelerCarousel] Error loading travelers:", error);
+
         // Try to return cached data even if expired
         const domain = window.location.hostname;
         const cacheKey = `walvee_travelers_cache_${domain}`;
         const cachedUsers = sessionStorage.getItem(cacheKey);
         if (cachedUsers) {
           const cache = JSON.parse(cachedUsers);
-          console.log('[TravelerCarousel] Using stale cache due to error');
+          console.log("[TravelerCarousel] Using stale cache due to error");
           return shuffleArray(cache.data);
         }
-        
+
         return [];
       }
     },
@@ -193,17 +220,17 @@ export default function TravelerCarousel() {
   }
 
   if (travelers.length === 0) {
-    console.warn('[TravelerCarousel] No travelers to display');
+    console.warn("[TravelerCarousel] No travelers to display");
     return null;
   }
 
   return (
     <div className="relative px-2 py-3">
       <div className="flex items-center justify-center">
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth max-w-xl"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {travelers.map((traveler) => (
             <Link
@@ -227,7 +254,7 @@ export default function TravelerCarousel() {
                 )}
               </div>
               <p className="text-xs text-center mt-1.5 text-gray-300 group-hover:text-white transition-colors w-16 truncate">
-                {traveler.preferred_name || traveler.full_name?.split(' ')[0]}
+                {traveler.preferred_name || traveler.full_name?.split(" ")[0]}
               </p>
             </Link>
           ))}

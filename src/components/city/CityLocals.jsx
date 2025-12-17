@@ -9,38 +9,40 @@ import UserAvatar from "../common/UserAvatar";
 export default function CityLocals({ cityName }) {
   // Fetch all users who live in this city
   const { data: locals = [], isLoading } = useQuery({
-    queryKey: ['cityLocals', cityName],
+    queryKey: ["cityLocals", cityName],
     queryFn: async () => {
       try {
         const isAuthenticated = await User.isAuthenticated();
         if (!isAuthenticated) {
-          console.log('[CityLocals] User not authenticated');
+          console.log("[CityLocals] User not authenticated");
           return [];
         }
 
-        console.log('[CityLocals] Fetching users for city:', cityName);
+        console.log("[CityLocals] Fetching users for city:", cityName);
         const allUsers = await User.list();
-        console.log('[CityLocals] Total users:', allUsers.length);
-        
+        console.log("[CityLocals] Total users:", allUsers.length);
+
         // Normalize city name for comparison
-        const normalizedCityName = cityName?.toLowerCase().trim() || '';
-        const cityNameOnly = normalizedCityName.split(',')[0].trim();
-        
+        const normalizedCityName = cityName?.toLowerCase().trim() || "";
+        const cityNameOnly = normalizedCityName.split(",")[0].trim();
+
         // Filter users who live in this city
-        const filtered = allUsers.filter(user => {
+        const filtered = allUsers.filter((user) => {
           if (!user.city) return false;
-          
+
           const userCity = user.city.toLowerCase().trim();
-          const userCityOnly = userCity.split(',')[0].trim();
-          
-          return userCityOnly === cityNameOnly || userCity === normalizedCityName;
+          const userCityOnly = userCity.split(",")[0].trim();
+
+          return (
+            userCityOnly === cityNameOnly || userCity === normalizedCityName
+          );
         });
-        
-        console.log('[CityLocals] Filtered locals:', filtered.length);
-        
+
+        console.log("[CityLocals] Filtered locals:", filtered.length);
+
         // Format and sort by trip count
         return filtered
-          .map(user => ({
+          .map((user) => ({
             id: user.id,
             email: user.email,
             name: user.preferred_name || user.full_name || user.email,
@@ -49,7 +51,7 @@ export default function CityLocals({ cityName }) {
             country: user.country,
             bio: user.bio,
             trips: user.metrics_my_trips || 0,
-            followers: user.metrics_followers || 0
+            followers: user.metrics_followers || 0,
           }))
           .sort((a, b) => {
             // Sort by trips first
@@ -58,7 +60,7 @@ export default function CityLocals({ cityName }) {
             return (b.followers || 0) - (a.followers || 0);
           });
       } catch (error) {
-        console.error('[CityLocals] Error fetching locals:', error);
+        console.error("[CityLocals] Error fetching locals:", error);
         return [];
       }
     },
@@ -84,7 +86,8 @@ export default function CityLocals({ cityName }) {
           No locals found yet
         </h3>
         <p className="text-gray-400">
-          Be the first to set {cityName} as your home city and connect with future travelers!
+          Be the first to set {cityName} as your home city and connect with
+          future travelers!
         </p>
       </div>
     );
@@ -98,7 +101,9 @@ export default function CityLocals({ cityName }) {
             Local Travelers in {cityName}
           </h2>
           <p className="text-gray-400">
-            Connect with {locals.length} {locals.length === 1 ? 'traveler' : 'travelers'} who call this city home
+            Connect with {locals.length}{" "}
+            {locals.length === 1 ? "traveler" : "travelers"} who call this city
+            home
           </p>
         </div>
       </div>
@@ -117,30 +122,32 @@ export default function CityLocals({ cityName }) {
                 userId={local.id}
                 size="lg"
               />
-              
+
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors truncate">
                   {local.name}
                 </h3>
-                
-                <p className="text-sm text-gray-400 truncate">
-                  {local.city}
-                </p>
-                
+
+                <p className="text-sm text-gray-400 truncate">{local.city}</p>
+
                 {local.bio && (
                   <p className="text-sm text-gray-500 mt-2 line-clamp-2">
                     {local.bio}
                   </p>
                 )}
-                
+
                 <div className="flex items-center gap-4 mt-3 text-xs">
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-white">{local.trips}</span>
+                    <span className="font-semibold text-white">
+                      {local.trips}
+                    </span>
                     <span className="text-gray-500">trips</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-white">{local.followers}</span>
+                    <span className="font-semibold text-white">
+                      {local.followers}
+                    </span>
                     <span className="text-gray-500">followers</span>
                   </div>
                 </div>

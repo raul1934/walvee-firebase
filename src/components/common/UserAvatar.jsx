@@ -6,42 +6,44 @@ const SIZES = {
   sm: { size: 32, imageSize: 64 },
   md: { size: 36, imageSize: 72 },
   lg: { size: 48, imageSize: 96 },
-  xl: { size: 64, imageSize: 128 }
+  xl: { size: 64, imageSize: 128 },
 };
 
-export default function UserAvatar({ 
-  src, 
-  name = "User", 
-  size = "md", 
+export default function UserAvatar({
+  src,
+  name = "User",
+  size = "md",
   ring = false,
   className = "",
   userId = null,
-  email = null
+  email = null,
 }) {
   const [imageError, setImageError] = React.useState(false);
   const { size: dimension, imageSize } = SIZES[size] || SIZES.md;
 
   // Check if it's Walvee logo
-  const isWalveeLogo = src?.includes('LogoWalvee.png');
+  const isWalveeLogo = src?.includes("LogoWalvee.png");
 
   // Generate initials from name
   const getInitials = (fullName) => {
     if (!fullName) return "?";
     const parts = fullName.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
   };
 
   // Optimize Google photo URL with size parameter
   const getOptimizedUrl = (url) => {
     if (!url) return null;
-    
+
     // If it's a Google photo URL, add size parameter
-    if (url.includes('googleusercontent.com') || url.includes('ggpht.com')) {
-      const hasParams = url.includes('?');
-      return `${url}${hasParams ? '&' : '?'}sz=${imageSize}`;
+    if (url.includes("googleusercontent.com") || url.includes("ggpht.com")) {
+      const hasParams = url.includes("?");
+      return `${url}${hasParams ? "&" : "?"}sz=${imageSize}`;
     }
-    
+
     return url;
   };
 
@@ -51,7 +53,7 @@ export default function UserAvatar({
   const baseClasses = `
     rounded-full 
     shrink-0
-    ${ring ? 'ring-2 ring-white shadow-[0_0_0_1px_rgba(0,0,0,0.2)]' : ''}
+    ${ring ? "ring-2 ring-white shadow-[0_0_0_1px_rgba(0,0,0,0.2)]" : ""}
     ${className}
   `;
 
@@ -62,9 +64,11 @@ export default function UserAvatar({
 
   // Determine if avatar should be a link
   const shouldBeLink = userId !== undefined && userId !== null;
-  
+
   // Use userId to create profile URL
-  const profileUrl = shouldBeLink ? createProfileUrl(userId || undefined) : null;
+  const profileUrl = shouldBeLink
+    ? createProfileUrl(userId || undefined)
+    : null;
 
   const avatarContent = () => {
     // Special rendering for Walvee logo
@@ -80,7 +84,7 @@ export default function UserAvatar({
             src={optimizedSrc}
             alt={name}
             className="w-[65%] h-[65%] object-contain"
-            style={{ filter: 'brightness(0) invert(1)' }}
+            style={{ filter: "brightness(0) invert(1)" }}
             onError={() => setImageError(true)}
             role="img"
           />
@@ -97,9 +101,7 @@ export default function UserAvatar({
           role="img"
           aria-label={name}
         >
-          <span style={{ fontSize: `${dimension * 0.4}px` }}>
-            {initials}
-          </span>
+          <span style={{ fontSize: `${dimension * 0.4}px` }}>{initials}</span>
         </div>
       );
     }
@@ -120,8 +122,8 @@ export default function UserAvatar({
   // Wrap with Link if email or userId is provided
   if (shouldBeLink && profileUrl) {
     return (
-      <Link 
-        to={profileUrl} 
+      <Link
+        to={profileUrl}
         className="inline-block hover:opacity-80 transition-opacity"
         onClick={(e) => e.stopPropagation()}
       >

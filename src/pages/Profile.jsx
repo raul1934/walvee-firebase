@@ -1195,7 +1195,9 @@ export default function Profile() {
                           share your adventures with the world.
                         </p>
                         <Button
-                          onClick={() => navigate(createPageUrl("InspirePrompt"))}
+                          onClick={() =>
+                            navigate(createPageUrl("InspirePrompt"))
+                          }
                           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/25"
                         >
                           Create your first trip
