@@ -9,7 +9,7 @@ import { Trip, TripLike, TripSteal } from "@/api/entities";
 import TripItinerary from "./TripItinerary";
 import TripCardViewToggle from "./TripCardViewToggle";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import UserAvatar from "../common/UserAvatar";
 import ImagePlaceholder from "../common/ImagePlaceholder";
 import StealModal from "../trip/StealModal";
@@ -214,22 +214,22 @@ export default function TripCard({ trip, isLoggedIn = true, onRestrictedAction, 
           {/* User Info Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#2A2B35]">
             <div className="flex items-center gap-3">
-              {/* Make UserAvatar clickable - ALWAYS USE EMAIL */}
+              {/* User Avatar with profile link */}
               <Link
-                to={`${createPageUrl("Profile")}?email=${encodeURIComponent(trip.created_by)}`}
+                to={createProfileUrl(trip.created_by)}
                 onClick={(e) => e.stopPropagation()}
               >
                 <UserAvatar
                   src={trip.author_photo}
                   name={trip.author_name || 'Arthur Gonçalves'}
-                  email={trip.created_by}
+                  userId={trip.created_by}
                   size="md"
                 />
               </Link>
               <div>
-                {/* Make name clickable - ALWAYS USE EMAIL */}
+                {/* User name with profile link */}
                 <Link
-                  to={`${createPageUrl("Profile")}?email=${encodeURIComponent(trip.created_by)}`}
+                  to={createProfileUrl(trip.created_by)}
                   onClick={(e) => e.stopPropagation()}
                   className="font-semibold text-white text-sm hover:text-blue-400 transition-colors"
                 >

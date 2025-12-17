@@ -5,8 +5,11 @@ export function createPageUrl(pageName: string) {
     return '/' + pageName.toLowerCase().replace(/ /g, '-');
 }
 
-export function createProfileUrl(username: string) {
-    return '/' + username;
+export function createProfileUrl(userId?: string) {
+    if (!userId) {
+        return '/profile';
+    }
+    return `/profile/${userId}`;
 }
 
 export function requireAuth(

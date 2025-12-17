@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createProfileUrl } from "@/utils";
 import { MapPin } from "lucide-react";
 import UserAvatar from "../common/UserAvatar";
 
@@ -9,7 +9,7 @@ export default function UserListItem({ user, currentUser, onFollowToggle }) {
   
   return (
     <Link
-      to={`${createPageUrl("Profile")}?email=${encodeURIComponent(user.email)}`}
+      to={createProfileUrl(user.id)}
       className="bg-[#1A1B23] rounded-xl p-4 border border-[#2A2B35] hover:border-blue-500/30 transition-all block"
     >
       <div className="flex items-start gap-3">
@@ -18,7 +18,6 @@ export default function UserListItem({ user, currentUser, onFollowToggle }) {
           name={user.preferred_name || user.full_name}
           size="lg"
           ring
-          email={user.email}
         />
         
         <div className="flex-1 min-w-0">

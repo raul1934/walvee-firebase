@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import { MapPin, ThumbsUp, Infinity } from "lucide-react";
 import { format } from "date-fns";
 import UserAvatar from "../common/UserAvatar";
@@ -63,7 +63,7 @@ export default function CityTripGrid({ trips, isLoading, currentUserId }) {
 
                 {/* Author Avatar Overlay */}
                 <Link
-                  to={`${createPageUrl("Profile")}?email=${encodeURIComponent(trip.created_by)}`}
+                  to={createProfileUrl(trip.created_by)}
                   onClick={(e) => e.stopPropagation()}
                   className="absolute top-3 left-3 hover:scale-110 transition-transform"
                 >
@@ -72,7 +72,7 @@ export default function CityTripGrid({ trips, isLoading, currentUserId }) {
                     name={trip.author_name}
                     size="md"
                     ring
-                    email={trip.created_by}
+                    userId={trip.created_by}
                   />
                 </Link>
               </div>

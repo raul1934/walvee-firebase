@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { User } from "@/api/entities";
 import { uploadImage } from "@/api/firebaseStorage";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -162,7 +162,7 @@ export default function EditProfile({ user, userLoading }) {
       }
 
       await User.updateMe(updateData);
-      window.location.href = createPageUrl("Profile");
+      window.location.href = createProfileUrl();
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");
@@ -354,7 +354,7 @@ export default function EditProfile({ user, userLoading }) {
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
-              onClick={() => (window.location.href = createPageUrl("Profile"))}
+              onClick={() => (window.location.href = createProfileUrl())}
               variant="outline"
               className="flex-1 h-12 border-gray-700 text-gray-300 hover:bg-gray-800"
             >

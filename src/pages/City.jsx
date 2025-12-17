@@ -199,7 +199,14 @@ export default function City({
     }
 
     const newTrips = trips.slice(0, offset + LIMIT);
-    setAllTrips(newTrips);
+    setAllTrips(prev => {
+      // Only update if the content actually changed
+      if (prev.length === newTrips.length &&
+          prev.every((trip, index) => trip.id === newTrips[index]?.id)) {
+        return prev;
+      }
+      return newTrips;
+    });
     setHasMore(newTrips.length < trips.length);
   }, [trips, offset]);
 

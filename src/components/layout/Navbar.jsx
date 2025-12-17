@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { User } from "@/api/entities";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import { Menu, Bell, Search } from "lucide-react";
 import UserAvatar from "../common/UserAvatar";
 import { useQuery } from "@tanstack/react-query";
@@ -124,9 +124,7 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                   {/* KPIs - hidden on mobile - ALL USING EMAIL */}
                   <div className="hidden md:flex items-center gap-4 mr-2">
                     <Link
-                      to={`${createPageUrl(
-                        "Profile"
-                      )}?email=${encodeURIComponent(user.email)}`}
+                      to={createProfileUrl()}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
                       <div className="text-lg font-bold text-white">
@@ -138,9 +136,7 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                     </Link>
 
                     <Link
-                      to={`${createPageUrl(
-                        "Profile"
-                      )}?email=${encodeURIComponent(user.email)}`}
+                      to={createProfileUrl()}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
                       <div className="text-lg font-bold text-white">
@@ -152,9 +148,7 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                     </Link>
 
                     <Link
-                      to={`${createPageUrl(
-                        "Profile"
-                      )}?email=${encodeURIComponent(user.email)}`}
+                      to={createProfileUrl()}
                       className="text-center hover:opacity-80 transition-opacity"
                     >
                       <div className="text-lg font-bold text-white">
@@ -172,13 +166,14 @@ export default function Navbar({ user, onMenuClick, openLoginModal }) {
                   </button>
 
                   {/* User Avatar - handles its own link internally */}
-                  <UserAvatar
-                    src={user.photo_url || user.picture}
-                    name={user.preferred_name || user.full_name || user.email}
-                    size="md"
-                    ring={true}
-                    email={user.email}
-                  />
+                  <Link to={createProfileUrl()}>
+                    <UserAvatar
+                      src={user.photo_url || user.picture}
+                      name={user.preferred_name || user.full_name || user.email}
+                      size="md"
+                      ring={true}
+                    />
+                  </Link>
                 </>
               ) : (
                 <button

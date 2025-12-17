@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createProfileUrl } from "@/utils";
 
 const SIZES = {
   sm: { size: 32, imageSize: 64 },
@@ -60,15 +60,11 @@ export default function UserAvatar({
     height: `${dimension}px`,
   };
 
-  // Determine if avatar should be a link - ALWAYS use email if provided
-  const shouldBeLink = email || userId;
+  // Determine if avatar should be a link
+  const shouldBeLink = userId !== undefined && userId !== null;
   
-  // PRIORITY: Use email if provided, otherwise userId
-  const profileUrl = email
-    ? `${createPageUrl("Profile")}?email=${encodeURIComponent(email)}`
-    : userId
-    ? `${createPageUrl("Profile")}?userId=${userId}`
-    : null;
+  // Use userId to create profile URL
+  const profileUrl = shouldBeLink ? createProfileUrl(userId || undefined) : null;
 
   const avatarContent = () => {
     // Special rendering for Walvee logo

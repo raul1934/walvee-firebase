@@ -75,6 +75,8 @@ const createEntity = (collectionName) => ({
   },
 
   async list(orderByField = 'created_date', limitCount = 100) {
+    console.log(`[${collectionName}] list() called with orderBy: ${orderByField}, limit: ${limitCount}`);
+
     // Handle Base44-style descending order prefix (e.g., "-created_date")
     const isDescending = orderByField.startsWith('-');
     const fieldName = isDescending ? orderByField.substring(1) : orderByField;
@@ -87,6 +89,8 @@ const createEntity = (collectionName) => ({
     );
 
     const snapshot = await getDocs(q);
+    console.log(`[${collectionName}] list() returned ${snapshot.size} documents`);
+
     return snapshot.docs.map(doc => {
       const data = doc.data();
       const processedData = processTimestamps(data);

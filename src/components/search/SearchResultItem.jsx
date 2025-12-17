@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import { MapPin, Star, ThumbsUp, Infinity, Users, TrendingUp } from "lucide-react";
 import UserAvatar from "../common/UserAvatar";
 import ImagePlaceholder from "../common/ImagePlaceholder";
@@ -134,7 +134,7 @@ export default function SearchResultItem({ result, onClose, onPlaceClick }) {
   if (result.type === 'user') {
     return (
       <Link
-        to={`${createPageUrl("Profile")}?email=${encodeURIComponent(result.email)}`}
+        to={createProfileUrl(result.id)}
         onClick={handleClick}
         className="flex items-center gap-4 p-4 hover:bg-[#1A1B23] rounded-xl transition-colors group"
       >

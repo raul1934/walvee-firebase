@@ -101,6 +101,8 @@ function PagesContent() {
           <Route path="/EnrichTripImages" element={<EnrichTripImages />} />
 
           <Route path="/Profile" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:userId" element={<Profile />} />
 
           <Route path="/EditProfile" element={<EditProfile />} />
 

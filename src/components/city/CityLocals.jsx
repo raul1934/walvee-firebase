@@ -2,7 +2,7 @@ import React from "react";
 import { User } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import { Users } from "lucide-react";
 import UserAvatar from "../common/UserAvatar";
 
@@ -107,14 +107,14 @@ export default function CityLocals({ cityName }) {
         {locals.map((local) => (
           <Link
             key={local.id}
-            to={`${createPageUrl("Profile")}?email=${encodeURIComponent(local.email)}`}
+            to={createProfileUrl(local.id)}
             className="bg-[#1A1B23] rounded-xl p-4 border border-[#2A2B35] hover:border-purple-500/50 transition-all group"
           >
             <div className="flex items-start gap-3">
               <UserAvatar
                 src={local.photo}
                 name={local.name}
-                email={local.email}
+                userId={local.id}
                 size="lg"
               />
               

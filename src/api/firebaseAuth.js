@@ -148,4 +148,26 @@ export const firebaseAuthService = {
     console.warn("redirectToLogin called but using popup instead");
     return firebaseAuthService.signInWithGoogle();
   },
+
+  // List all users (for CityLocals and other features)
+  list: async (orderByField = 'created_at', limitCount = 100) => {
+    const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
+
+    // Handle Base44-style descending order prefix
+    const isDescending = orderByField.startsWith('-');
+    const fieldName = isDescending ? orderByField.substring(1) : orderByField;
+    const direction = isDescending ? 'desc' : 'asc';
+
+    const q = query(
+      collection(db, 'users'),
+      orderBy(fieldName, direction),
+      limit(limitCount)
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  },
 };

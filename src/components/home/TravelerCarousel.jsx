@@ -3,7 +3,7 @@ import { Trip, User } from "@/api/entities";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import UserAvatar from "../common/UserAvatar";
 
 // Fisher-Yates shuffle algorithm
@@ -208,7 +208,7 @@ export default function TravelerCarousel() {
           {travelers.map((traveler) => (
             <Link
               key={traveler.id}
-              to={`${createPageUrl("Profile")}?email=${encodeURIComponent(traveler.email || '')}`}
+              to={createProfileUrl(traveler.id)}
               className="flex-shrink-0 group cursor-pointer flex flex-col items-center"
             >
               <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-700 group-hover:border-purple-500 transition-all duration-300 group-hover:scale-110 relative">
@@ -217,7 +217,7 @@ export default function TravelerCarousel() {
                     src={traveler.photo_url || traveler.picture}
                     name={traveler.preferred_name || traveler.full_name}
                     size="xl"
-                    email={traveler.email}
+                    userId={traveler.id}
                   />
                 </div>
                 {traveler.score > 20 && (

@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "node scripts/seed-new.js",
+    "seed:cleanup": "node scripts/cleanup-trips.js",
+    "seed:fresh": "node scripts/seed-fresh.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.2",
@@ -69,6 +72,7 @@
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.2.3",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",

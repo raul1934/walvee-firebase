@@ -11,6 +11,13 @@ import TripCard from "../components/home/TripCard";
 import { useDragScroll } from "../components/hooks/useDragScroll";
 
 export default function Home({ user, userLoading, openLoginModal }) {
+  console.log('[Home] 🏠 Component rendered', {
+    hasUser: !!user,
+    userEmail: user?.email,
+    userLoading,
+    timestamp: new Date().toISOString()
+  });
+
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [isHoveringCards, setIsHoveringCards] = useState(false);
   const scrollRef = React.useRef(null);
@@ -20,13 +27,18 @@ export default function Home({ user, userLoading, openLoginModal }) {
 
   // Reset all trip cards to default state when component mounts
   useEffect(() => {
+    console.log('[Home] 🧹 Cleaning sessionStorage and cache');
     // Clear all trip view preferences from sessionStorage
     Object.keys(sessionStorage).forEach(key => {
       if (key.startsWith('tripView_')) {
         sessionStorage.removeItem(key);
       }
     });
-  }, []);
+
+    // Force clear React Query cache for trips
+    queryClient.removeQueries(['trips']);
+    console.log('[Home] 🗑️ Cleared trips query cache');
+  }, [queryClient]);
 
   useEffect(() => {
     if (!userLoading && user && !user.onboarding_completed) {
@@ -35,21 +47,45 @@ export default function Home({ user, userLoading, openLoginModal }) {
   }, [user, userLoading, navigate]);
 
   // Fetch trips and randomize order
-  const { data: trips, isLoading } = useQuery({
+  console.log('[Home] 📊 Setting up useQuery for trips...');
+  const { data: trips = [], isLoading, error, refetch } = useQuery({
     queryKey: ['trips'],
     queryFn: async () => {
-      const allTrips = await Trip.list("-created_date");
-      
-      // Fisher-Yates shuffle algorithm to randomize order
-      const shuffled = [...allTrips];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      console.log('[Home] ⬇️ Fetching trips...');
+      try {
+        const allTrips = await Trip.list("-created_date");
+        console.log('[Home] ✅ Trips fetched:', allTrips.length);
+
+        // Fisher-Yates shuffle algorithm to randomize order
+        const shuffled = [...allTrips];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        return shuffled;
+      } catch (err) {
+        console.error('[Home] ❌ Error fetching trips:', err);
+        throw err;
       }
-      
-      return shuffled;
     },
-    initialData: []
+    staleTime: 0, // Consider data immediately stale to force refetch
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false,
+    retry: 2,
+    onError: (err) => {
+      console.error('[Home] ❌ React Query error:', err);
+    },
+    onSuccess: (data) => {
+      console.log('[Home] ✅ React Query success:', data?.length, 'trips');
+    }
+  });
+
+  console.log('[Home] 📈 Query state:', {
+    tripsCount: trips?.length,
+    isLoading,
+    hasError: !!error,
+    errorMessage: error?.message
   });
 
   // Fetch ALL user's likes in a SINGLE query to avoid rate limit
@@ -178,6 +214,12 @@ export default function Home({ user, userLoading, openLoginModal }) {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
 
                 <div className="space-y-6 pb-20">
+                  {error && (
+                    <div className="text-red-500 p-4 bg-red-50 rounded-lg">
+                      <p className="font-bold">Error loading trips:</p>
+                      <p className="text-sm">{error.message}</p>
+                    </div>
+                  )}
                   {isLoading || isLoadingUserLikes ? (
                     <div className="flex justify-center items-center py-20">
                       <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />

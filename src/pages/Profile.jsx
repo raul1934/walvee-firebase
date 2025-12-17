@@ -24,8 +24,8 @@ import FavoriteCard from "../components/profile/FavoriteCard";
 import UserListItem from "../components/profile/UserListItem";
 import PlaceModal from "../components/city/PlaceModal";
 import ProfileTripFilters from "../components/profile/ProfileTripFilters";
-import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { useNavigate, useParams } from "react-router-dom";
+import { createPageUrl, createProfileUrl } from "@/utils";
 import EditProfilePanel from "../components/profile/EditProfilePanel";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,8 +33,9 @@ export default function Profile() {
   const { user: currentUser, openLoginModal } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { userId: urlUserId } = useParams();
   const urlParams = new URLSearchParams(window.location.search);
-  const profileUserId = urlParams.get("userId");
+  const profileUserId = urlUserId || urlParams.get("userId");
   const profileUserEmail = urlParams.get("email");
 
   const isEmailInUserId = profileUserId?.includes("@");
@@ -1194,7 +1195,7 @@ export default function Profile() {
                           share your adventures with the world.
                         </p>
                         <Button
-                          onClick={() => navigate(createPageUrl("CreateTrip"))}
+                          onClick={() => navigate(createPageUrl("InspirePrompt"))}
                           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-blue-500/25"
                         >
                           Create your first trip
